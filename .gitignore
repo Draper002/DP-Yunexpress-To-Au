@@ -1,0 +1,28 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+
+build/
+dist/
+release*/
+*.exe
+*.dmg
+*.pkg
+*.zip
+
+# Business data and buyer information must never enter Git.
+Codex发货记录/
+outputs/
+*.csv
+*.xlsx
+*.xls
+*.xlsm
+*.pdf
+
+# Machine-local configuration.
+config.json
+*.local.json
+
+
