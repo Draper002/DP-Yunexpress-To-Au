@@ -13,7 +13,7 @@ DropShipZone 澳大利亚订单到云途发货的本地桌面工具，同时维�
 - Windows：业务流程已验证，OS 26 风格浅色界面已打包测试。
 - macOS：M5 MacBook Air / macOS 26 的 arm64 版本待开发。
 - 最新进度：见 [`docs/DEVELOPMENT_PROGRESS.md`](docs/DEVELOPMENT_PROGRESS.md)。
-- Mac 交接：见 [`MacBook_M5_macOS26开发交接文档.md`](MacBook_M5_macOS26开发交接文档.md)。
+- Mac 交接：见 [`docs/MACOS_M5_HANDOFF_ZH.md`](docs/MACOS_M5_HANDOFF_ZH.md)。
 
 ## 源码结构
 
@@ -25,7 +25,7 @@ scripts/
   sort_yunexpress_labels_by_sku.py
 docs/
   DEVELOPMENT_PROGRESS.md
-MacBook_M5_macOS26开发交接文档.md
+  MACOS_M5_HANDOFF_ZH.md
 ```
 
 ## 本地运行
