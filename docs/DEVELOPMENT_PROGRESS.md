@@ -1,13 +1,14 @@
 # 开发进度
 
-更新时间：`2026-07-11 11:20 CST (Asia/Shanghai)`
+更新时间：`2026-07-11 12:30 CST (Asia/Shanghai)`
 
 ## 项目阶段
 
 | 平台 | 状态 | 当前交付 |
 |---|---|---|
 | Windows x64 | 已完成可测试版本 | 独立 `.exe`，三步界面和打开结果目录功能 |
-| macOS arm64 | 待开始 | 目标为 M5 MacBook Air / macOS 26 的 `.app` 和 `.dmg` |
+| macOS arm64 | 开发中 | 代码归档于 `desktop/macos/`，目标为 M5 MacBook Air / macOS 26 的 `.app` 和 `.dmg` |
+| Web | MVP 开发中 | 代码归档于 `web/`，共用 `shared/fulfillment/` |
 | 正式签名分发 | 暂缓 | 当前没有 Apple Developer 账户 |
 
 ## 已完成
@@ -53,11 +54,11 @@
 9. 用 PyInstaller 构建 arm64 `.app`。
 10. 进行临时签名并制作本机测试版 `.dmg`。
 
-详细要求见 [`MACOS_M5_HANDOFF_ZH.md`](MACOS_M5_HANDOFF_ZH.md)。
+详细要求见 [`../desktop/macos/MACOS_M5_HANDOFF_ZH.md`](../desktop/macos/MACOS_M5_HANDOFF_ZH.md)。
 
 ## 当前已知限制
 
-- `app.py` 的打开文件夹操作仍使用 Windows `explorer`。
+- Windows、Mac 和 Web 的入口已经分开，业务脚本统一位于 `shared/fulfillment/`。
 - 多个脚本各自定义输出路径，尚未抽取为共享模块。
 - 固定配置路径尚未写入跨平台配置文件。
 - Tkinter 可以实现接近 OS 26 的配色和层级，但无法实现完整原生液态玻璃效果。
@@ -72,6 +73,7 @@
 - 完成 Windows `.exe` 重新构建和启动验证。
 - 创建 M5 / macOS 26 开发交接文档。
 - 创建私有 GitHub 仓库的首次源码、文档和进度导入资料。
+- 按 Windows、macOS、Web、共享业务逻辑重新整理代码目录，并验证两个程序入口可找到共享脚本。
 
 ### 2026-07-10
 
