@@ -53,7 +53,7 @@
 9. 用 PyInstaller 构建 arm64 `.app`。
 10. 进行临时签名并制作本机测试版 `.dmg`。
 
-详细要求见 [`../MacBook_M5_macOS26开发交接文档.md`](../MacBook_M5_macOS26开发交接文档.md)。
+详细要求见 [`MACOS_M5_HANDOFF_ZH.md`](MACOS_M5_HANDOFF_ZH.md)。
 
 ## 当前已知限制
 
