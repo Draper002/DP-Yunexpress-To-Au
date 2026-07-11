@@ -1,70 +1,39 @@
 # DP&Yunexpress To Au
 
-DropShipZone 澳大利亚订单到云途发货的本地桌面工具，同时维护 Windows 与 Apple Silicon macOS 版本。
+DropShipZone -> YunExpress 澳大利亚发货工具，包含 Windows 桌面版、macOS Apple Silicon 版和云服务器网页版本。
 
-## 当前功能
-
-1. 从 DP 订单 CSV 生成云途批量寄件 Excel。
-2. 从云途订单信息生成 DP 发货回填模板。
-3. 按 SKU 分拣云途面单 PDF，并为每个供应商生成独立 ZIP。
-
-## 当前状态
-
-- Windows：业务流程已验证，OS 26 风格浅色界面已打包测试。
-- macOS：M5 MacBook Air / macOS 26 的 arm64 版本待开发。
-- Web：云服务器多账号 MVP 已开始，见 [`webapp/README.md`](webapp/README.md) 和 [`webapp/docs/WEB_DEVELOPMENT_PROGRESS.md`](webapp/docs/WEB_DEVELOPMENT_PROGRESS.md)。
-- 最新进度：见 [`docs/DEVELOPMENT_PROGRESS.md`](docs/DEVELOPMENT_PROGRESS.md)。
-- Mac 交接：见 [`docs/MACOS_M5_HANDOFF_ZH.md`](docs/MACOS_M5_HANDOFF_ZH.md)。
-
-## 源码结构
+## 代码目录
 
 ```text
-app.py
-scripts/
-  generate_yunexpress_template.py
-  generate_dp_shipment_upload.py
-  sort_yunexpress_labels_by_sku.py
-docs/
-  DEVELOPMENT_PROGRESS.md
-  MACOS_M5_HANDOFF_ZH.md
-webapp/
-  app.py
-  requirements.txt
-  docs/WEB_DEVELOPMENT_PROGRESS.md
+desktop/
+  windows/              Windows 桌面程序入口和打包配置
+  macos/                Mac 入口、适配说明和 Mac 打包文件
+web/                    Web 网页程序入口、依赖和网页进度
+shared/
+  fulfillment/          三个平台共用的订单、运单和 SKU 业务逻辑
+docs/                   总体需求和开发进度文档
 ```
 
-## 本地运行
+## 三个平台的职责
 
-```bash
-python -m venv .venv
-```
+| 目录 | 作用 | 当前状态 |
+|---|---|---|
+| `desktop/windows/` | Windows `.exe` 桌面应用 | 已完成可测试版 |
+| `desktop/macos/` | M5 MacBook / macOS 26 应用 | 开发中 |
+| `web/` | 云服务器多账号网页应用 | MVP 开发中 |
+| `shared/fulfillment/` | 三个平台共用的核心处理逻辑 | 已验证 |
 
-Windows：
+## 重要规则
 
-```powershell
-.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python app.py
-```
+业务脚本只维护 `shared/fulfillment/` 这一份。Windows、Mac 和 Web 只负责界面、文件上传下载、账号权限和平台适配。真实订单、买家信息、模板、面单和输出文件禁止提交到 Git。
 
-macOS：
+## 文档入口
 
-```bash
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python app.py
-```
+- Windows：[desktop/windows/README.md](desktop/windows/README.md)
+- Mac：[desktop/macos/README.md](desktop/macos/README.md)
+- Mac 交接：[desktop/macos/MACOS_M5_HANDOFF_ZH.md](desktop/macos/MACOS_M5_HANDOFF_ZH.md)
+- Web：[web/README.md](web/README.md)
+- Web 进度：[web/docs/WEB_DEVELOPMENT_PROGRESS.md](web/docs/WEB_DEVELOPMENT_PROGRESS.md)
+- 总体进度：[docs/DEVELOPMENT_PROGRESS.md](docs/DEVELOPMENT_PROGRESS.md)
 
-## 隐私与数据安全
-
-仓库只保存源码和脱敏开发文档。严禁提交真实订单 CSV、买家姓名、地址、电话、云途订单、面单 PDF、SKU/模板工作簿及发货输出。`.gitignore` 已默认排除常见业务文件格式，但提交前仍必须人工检查。
-
-## 固定业务参数
-
-- 云途产品代码：`THPHR`
-- 国家：`AU`
-- 申报币种：`USD`
-- DP 承运商：`YunExpress`
-
-任何字段映射或匹配规则修改，都必须用同一批脱敏数据在 Windows 和 macOS 进行字段级对比。
 
