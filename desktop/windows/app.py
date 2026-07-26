@@ -372,5 +372,765 @@ class App:
         bar.grid_columnconfigure(0, weight=1)
         tk.Label(
             bar,
-            text="è¿è¡Œæ—¥å¿—",ç~4¶‰Ëkºwµç@€€€‰ôÀ°(€€€€€€€€€€€Á…‘àôÄà°(€€€€€€€€€€€Á…‘äôà°(€€€€€€€€€€€ÕÉÍ½Èô‰¡…¹Èˆ°(€€€€€€€€€€€™½¹Ğô ‰5¥É½Í½™Ğe…!•¤U$ˆ°€ÄÀ°€‰‰½±ˆ¤°(€€€€€€€€¤((€€€‘•˜Í•½¹‘…Éå}‰ÕÑÑ½¸¡Í•±˜°Á…É•¹Ğ°Ñ•áĞ°½µµ…¹°½µÁ…Ğõ…±Í”¤è(€€€€€€€É•ÑÕÉ¸Ñ¬¹	ÕÑÑ½¸ (€€€€€€€€€€€Á…É•¹Ğ°(€€€€€€€€€€€Ñ•áĞõÑ•áĞ°(€€€€€€€€€€€½µµ…¹õ½µµ…¹°(€€€€€€€€€€€‰œõÍ•±˜¹=1=IMl‰‰ÕÑÑ½¹}Í½™Ğ‰t°(€€€€€€€€€€€™œõÍ•±˜¹=1=IMl‰¥¹¬‰t°(€€€€€€€€€€€…Ñ¥Ù•‰…­É½Õ¹ôˆ‘™•…˜Øˆ°(€€€€€€€€€€€…Ñ¥Ù•™½É•É½Õ¹õÍ•±˜¹=1=IMl‰¥¹¬‰t°(€€€€€€€€€€€É•±¥•˜ô‰™±…Ğˆ°(€€€€€€€€€€€‰ôÀ°(€€€€€€€€€€€Á…‘àôà¥˜½µÁ…Ğ•±Í”€ÄÄ°(€€€€€€€€€€€Á…‘äôÌ¥˜½µÁ…Ğ•±Í”€Ø°(€€€€€€€€€€€ÕÉÍ½Èô‰¡…¹Èˆ°(€€€€€€€€€€€™½¹Ğô ‰5¥É½Í½™Ğe…!•¤U$ˆ°€ä¤°(€€€€€€€€¤((€€€‘•˜¥¹™½}‘½Ğ¡Í•±˜°Á…É•¹Ğ°Ñ•áĞ°‰œõ9½¹”°™œõ9½¹”¤è(€€€€€€€½±½È€ô‰œ½ÈÍ•±˜¹=1=IMl‰ÍÕÉ™…”‰t(€€€€€€€½ÕÑ±¥¹”€ô™œ½È€ˆŒÜĞàÌå„ˆ(€€€€€€€¡½Ù•É}™¥±°€ô€ˆ”Ñ˜Å™˜ˆ(€€€€€€€µ…É¬€ôÑ¬¹…¹Ù…Ì (€€€€€€€€€€€Á…É•¹Ğ°(€€€€€€€€€€€İ¥‘Ñ ôÄÜ°(€€€€€€€€€€€¡•¥¡ĞôÄÜ°(€€€€€€€€€€€‰œõ½±½È°(€€€€€€€€€€€¡¥¡±¥¡ÑÑ¡¥­¹•ÍÌôÀ°(€€€€€€€€€€€‰ôÀ°(€€€€€€€€€€€ÕÉÍ½Èô‰¡…¹Èˆ°(€€€€€€€€¤(€€€€€€€¥É±”€ôµ…É¬¹É•…Ñ•}½Ù…° È°€È°€ÄÔ°€ÄÔ°½ÕÑ±¥¹”õ½ÕÑ±¥¹”°İ¥‘Ñ ôÄ¤(€€€€€€€µ…É¬¹É•…Ñ•}Ñ•áĞ à¸Ô°€à¸À°Ñ•áĞô‰¤ˆ°™¥±°õ½ÕÑ±¥¹”°™½¹Ğô ‰M•½”U$ˆ°€à°€‰‰½±ˆ¤¤((€€€€€€€‘•˜½¹}•¹Ñ•È¡}•Ù•¹Ğõ9½¹”¤è(€€€€€€€€€€€µ…É¬¹¥Ñ•µ½¹™¥ÕÉ”¡¥É±”°™¥±°õ¡½Ù•É}™¥±°¤((€€€€€€€‘•˜½¹}±•…Ù”¡}•Ù•¹Ğõ9½¹”¤è(€€€€€€€€€€€µ…É¬¹¥Ñ•µ½¹™¥ÕÉ”¡¥É±”°™¥±°õ½±½È¤((€€€€€€€µ…É¬¹‰¥¹ ˆñ¹Ñ•Èøˆ°½¹}•¹Ñ•È°…‘ôˆ¬ˆ¤(€€€€€€€µ…É¬¹‰¥¹ ˆñ1•…Ù”øˆ°½¹}±•…Ù”°…‘ôˆ¬ˆ¤(€€€€€€€Q½½±Ñ¥À¡µ…É¬°Ñ•áĞ¤(€€€€€€€É•ÑÕÉ¸µ…É¬((€€€‘•˜Á¥­}™¥±”¡Í•±˜°­•ä°™¥±•ÑåÁ•Ì¤è(€€€€€€€Á…Ñ €ô™¥±•‘¥…±½œ¹…Í­½Á•¹™¥±•¹…µ”¡™¥±•ÑåÁ•Ìõ™¥±•ÑåÁ•Ì€¬l ‹š&šr'šZ’îØˆ°€ˆ¨¸¨ˆ¥t¤(€€€€€€€¥˜Á…Ñ è(€€€€€€€€€€€Í•±˜¹Ù…ÉÍm­•åt¹Í•Ğ¡Á…Ñ ¤((€€€‘•˜½Á•¹}½¹™¥}‘¥…±½œ¡Í•±˜¤è(€€€€€€€‘¥…±½œ€ôÑ¬¹Q½Á±•Ù•°¡Í•±˜¹É½½Ğ¤(€€€€€€€‘¥…±½œ¹Ñ¥Ñ±” ‹–në–ºk¦7ö¸ˆ¤(€€€€€€€‘¥…±½œ¹•½µ•ÑÉä ˆàÈÁàĞÄÀˆ¤(€€€€€€€‘¥…±½œ¹µ¥¹Í¥é” ÜØÀ°€ÌäÀ¤(€€€€€€€‘¥…±½œ¹½¹™¥ÕÉ”¡‰œõÍ•±˜¹=1=IMl‰‰œ‰t¤(€€€€€€€‘¥…±½œ¹ÑÉ…¹Í¥•¹Ğ¡Í•±˜¹É½½Ğ¤(€€€€€€€‘¥…±½œ¹É…‰}Í•Ğ ¤((€€€€€€€Á…¹•°€ôÍ•±˜¹…É¡‘¥…±½œ°Á…ôÄØ¤(€€€€€€€Á…¹•°¹Á…¬¡™¥±°ô‰‰½Ñ ˆ°•áÁ…¹õQÉÕ”°Á…‘àôÄØ°Á…‘äôÄØ¤(€€€€€€€Á…¹•°¹É¥‘}½±Õµ¹½¹™¥ÕÉ” À°İ•¥¡ĞôÄ¤((€€€€€€€Ñ¬¹1…‰•° (€€€€€€€€€€€Á…¹•°°(€€€€€€€€€€€Ñ•áĞô‹–në–ºk¦7ö¸ˆ°(€€€€€€€€€€€‰œõÍ•±˜¹=1=IMl‰ÍÕÉ™…”‰t°(€€€€€€€€€€€™œõÍ•±˜¹=1=IMl‰¥¹¬‰t°(€€€€€€€€€€€™½¹Ğô ‰5¥É½Í½™Ğe…!•¤U$ˆ°€ÄØ°€‰‰½±ˆ¤°(€€€€€€€€¤¹É¥¡É½ÜôÀ°½±Õµ¸ôÀ°ÍÑ¥­äô‰Üˆ¤(€€€€€€€Ñ¬¹1…‰•° (€€€€€€€€€€€Á…¹•°°(€€€€€€€€€€€Ñ•áĞô‹¢şg’êošZ’îÛ¦k–âã’â7¦r¢šš¾?–’§’ş»šRç–>«šr$M-Tƒ–V–N–êOš"[–æÏ–>Ãš¢‡švÿšnÓšZÃš^Û¾ò3š&7¦r¢š–r£¢şg¦3¦7šZÃ¦'š.§ˆ°(€€€€€€€€€€€‰œõÍ•±˜¹=1=IMl‰ÍÕÉ™…”‰t°(€€€€€€€€€€€™œõÍ•±˜¹=1=IMl‰µÕÑ•‰t°(€€€€€€€€€€€™½¹Ğô ‰5¥É½Í½™Ğe…!•¤U$ˆ°€ä¤°(€€€€€€€€€€€İÉ…Á±•¹Ñ ôÜØÀ°(€€€€€€€€€€€©ÕÍÑ¥™äô‰±•™Ğˆ°(€€€€€€€€¤¹É¥¡É½ÜôÄ°½±Õµ¸ôÀ°ÍÑ¥­äô‰Üˆ°Á…‘äô Ô°€ÄÈ¤¤((€€€€€€€™½ÈÉ½Ü°€¡±…‰•°°­•ä°™¥±•ÑåÁ•Ì¤¥¸•¹Õµ•É…Ñ”¡Í•±˜¹½¹™¥}™¥±•Ì°ÍÑ…ÉĞôÈ¤è(€€€€€€€€€€€Í•±˜¹½¹™¥}™¥±•}™¥•±¡Á…¹•°°É½Ü°±…‰•°°­•ä°™¥±•ÑåÁ•Ì¤((€€€€€€€…Ñ¥½¹Ì€ôÑ¬¹É…µ”¡Á…¹•°°‰œõÍ•±˜¹=1=IMl‰ÍÕÉ™…”‰t¤(€€€€€€€…Ñ¥½¹Ì¹É¥¡É½Üõ±•¸¡Í•±˜¹½¹™¥}™¥±•Ì¤€¬€È°½±Õµ¸ôÀ°ÍÑ¥­äô‰•Üˆ°Á…‘äô ÄĞ°€À¤¤(€€€€€€€…Ñ¥½¹Ì¹É¥‘}½±Õµ¹½¹™¥ÕÉ” À°İ•¥¡ĞôÄ¤(€€€€€€€Í•±˜¹Í•½¹‘…Éå}‰ÕÑÑ½¸¡…Ñ¥½¹Ì°€‹¢«–*£¢¾–"¯–në–ºk¦7ö¸ˆ°Í•±˜¹…ÕÑ½™¥±±}½¹™¥œ¤¹É¥¡É½ÜôÀ°½±Õµ¸ôÀ°ÍÑ¥­äô‰Üˆ¤(€€€€€€€Í•±˜¹ÁÉ¥µ…Éå}‰ÕÑÑ½¸¡…Ñ¥½¹Ì°€‹’şw–¶c–æÛ–Ï¦^´ˆ°‘¥…±½œ¹‘•ÍÑÉ½ä¤¹É¥¡É½ÜôÀ°½±Õµ¸ôÄ°ÍÑ¥­äô‰”ˆ¤((€€€‘•˜½¹™¥}™¥±•}™¥•±¡Í•±˜°Á…É•¹Ğ°É½Ü°±…‰•°°­•ä°™¥±•ÑåÁ•Ì¤è(€€€€€€€™¥•±€ôÑ¬¹É…µ”¡Á…É•¹Ğ°‰œõÍ•±˜¹=1=IMl‰ÍÕÉ™…”‰t¤(€€€€€€€™¥•±¹É¥¡É½ÜõÉ½Ü°½±Õµ¸ôÀ°ÍÑ¥­äô‰•Üˆ°Á…‘äôØ¤(€€€€€€€™¥•±¹É¥‘}½±Õµ¹½¹™¥ÕÉ” Ä°İ•¥¡ĞôÄ¤(€€€€€€€Ñ¬¹1…‰•° (€€€€€€€€€€€™¥•±°(€€€€€€€€€€€Ñ•áĞõ±…‰•°°(€€€€€€€€€€€‰œõÍ•±˜¹=1=IMl‰ÍÕÉ™…”‰t°(€€€€€€€€€€€™œõÍ•±˜¹=1=IMl‰¥¹¬‰t°(€€€€€€€€€€€™½¹Ğô ‰5¥É½Í½™Ğe…!•¤U$ˆ°€ä°€‰‰½±ˆ¤°(€€€€€€€€€€€İ¥‘Ñ ôÄØ°(€€€€€€€€€€€…¹¡½Èô‰Üˆ°(€€€€€€€€¤¹É¥¡É½ÜôÀ°½±Õµ¸ôÀ°ÍÑ¥­äô‰Üˆ°Á…‘àô À°€à¤¤(€€€€€€€Í•±˜¹•¹ÑÉä¡™¥•±°Í•±˜¹Ù…ÉÍm­•åt¤¹É¥¡É½ÜôÀ°½±Õµ¸ôÄ°ÍÑ¥­äô‰•Üˆ°Á…‘àô À°€à¤¤(€€€€€€€Í•±˜¹Í•½¹‘…Éå}‰ÕÑÑ½¸¡™¥•±°€‹¦'š.¤ˆ°±…µ‰‘„èÍ•±˜¹Á¥­}™¥±”¡­•ä°™¥±•ÑåÁ•Ì¤°½µÁ…ĞõQÉÕ”¤¹É¥ (€€€€€€€€€€€É½ÜôÀ°½±Õµ¸ôÈ°ÍÑ¥­äô‰”ˆ(€€€€€€€€¤((€€€‘•˜É•™É•Í¡}½ÕÑÁÕÑ}‘¥È¡Í•±˜¤è(€€€€€€€ÑÉäè(€€€€€€€€€€€Í•±˜¹½ÕÑÁÕÑ}‘¥È¹Í•Ğ¡ÍÑÈ¡‘…Ñ•}™½±‘•È¡Í•±˜¹Ù…ÉÍl‰‘…Ñ”‰t¹•Ğ ¤¤¤¤(€€€€€€€€€€€É•ÑÕÉ¸QÉÕ”(€€€€€€€•á•ÁĞá•ÁÑ¥½¸è(€€€€€€€€€€€µ•ÍÍ…•‰½à¹Í¡½İ•ÉÉ½È ‹š^—šrš‚ó–ò?¦Rg¢¾¼ˆ°€‹¢¾ß’öÿR eeedµ54µ¾ò3’ú/–š€ÈÀÈØ´ÀÜ´ÄÀˆ¤(€€€€€€€€€€€É•ÑÕÉ¸…±Í”((€€€‘•˜…ÕÑ½™¥±±}±…Ñ•ÍĞ¡Í•±˜¤è(€€€€€€€Í•±˜¹Ù…ÉÍl‰‘Á}½É‘•ÉÌ‰t¹Í•Ğ¡±…Ñ•ÍÑ}™¥±”¡U1Q}=]91=L°€‰áÁ½ÉÑ•‘}=É‘•ÉÍ|¨¹ÍØˆ¤¤(€€€€€€€Í•±˜¹Ù…ÉÍl‰åÕ¹}½É‘•ÉÌ‰t¹Í•Ğ¡±…Ñ•ÍÑ}™¥±”¡U1Q}=]91=L°€‹¢º‹–6W’ş‡š½|¨¹á±Íàˆ¤¤(€€€€€€€Í•±˜¹Ù…ÉÍl‰Í™}½É‘•ÉÌ‰t¹Í•Ğ¡±…Ñ•ÍÑ}™¥±”¡U1Q}=]91=L°€‹¦†ë’âÃ¢º‹–6WšVÃš6¸¨¹á±Ì¨ˆ¤¤(€€€€€€€Í•±˜¹Ù…ÉÍl‰±…‰•±}é¥À‰t¹Í•Ğ¡±…Ñ•ÍÑ}™¥±”¡U1Q}=]91=L°€‹¢şC–6Wš‚¶ø¨¹é¥Àˆ¤¤(€€€€€€€Í•±˜¹Ù…ÉÍl‰Í™}±…‰•±}Á‘˜‰t¹Í•Ğ¡±…Ñ•ÍÑ}™¥±”¡U1Q}=]91=L°€‰±…‰•±M¨¹Á‘˜ˆ¤¤(€€€€€€€Í•±˜¹…ÕÑ½™¥±±}½¹™¥œ¡İÉ¥Ñ•}±½œõ…±Í”¤(€€€€€€€Í•±˜¹İÉ¥Ñ” ‹–ŞË¦7šZÃ¢¾–"¯šr³š²‡š&çš²‡šZ’îÛ¾ò3–æÛ–B3š¶—šš~—–në–ºk¦7ö»¢¾ß†»¢º“¢Ş¿–úšb¿–B›–¾ç–êS–öO–&7š&çš²‡ˆ¤((€€€‘•˜…ÕÑ½™¥±±}½¹™¥œ¡Í•±˜°İÉ¥Ñ•}±½œõQÉÕ”¤è(€€€€€€€Í•±˜¹Ù…ÉÍl‰Í­Ô‰t¹Í•Ğ¡±…Ñ•ÍÑ}™¥±”¡U1Q}M-U}%H°€ˆ©M-T¨¹á±Íàˆ¤¤(€€€€€€€Í•±˜¹Ù…ÉÍl‰åÕ¹}Ñ•µÁ±…Ñ”‰t¹Í•Ğ¡±…Ñ•ÍÑ}™¥±”¡U1Q}Q5A1Q}%H°€ˆ©8ÁÀÈÄÔÜà¨¹á±Íàˆ¤¤(€€€€€€€Í•±˜¹Ù…ÉÍl‰Í™}Ñ•µÁ±…Ñ”‰t¹Í•Ğ (€€€€€€€€€€€±…Ñ•ÍÑ}™¥±•}…É½ÍÌ (€€€€€€€€€€€€€€€l(€€€€€€€€€€€€€€€€€€€€¡U1Q}=]91=L°€‰	…Ñ¡%µÁ½ÉÑ=É‘•ÉÍ|¨¹á±Í´ˆ¤°(€€€€€€€€€€€€€€€€€€€€¡U1Q}Q5A1Q}%H°€‰	…Ñ¡%µÁ½ÉÑ=É‘•ÉÍ|¨¹á±Í´ˆ¤°(€€€€€€€€€€€€€€€t(€€€€€€€€€€€€¤(€€€€€€€€¤(€€€€€€€Í•±˜¹Ù…ÉÍl‰‘Á}Ñ•µÁ±…Ñ”‰t¹Í•Ğ¡±…Ñ•ÍÑ}™¥±”¡U1Q}Q5A1Q}%H°€ˆ©M¡¥Áµ•¹Ñ}Í…µÁ±”¹á±Íàˆ¤¤(€€€€€€€¥˜İÉ¥Ñ•}±½œè(€€€€€€€€€€€Í•±˜¹İÉ¥Ñ” ‹–ŞË¦7šZÃ¢¾–"¯–në–ºk¦7ö»	M-Tƒ–V–N–êO–J3š¢‡švÿ–ššzsšÊ‡šr'šnÓšZÃ¾ò3–æÏš^Û’â7¦r¢ššRçˆ¤((€€€‘•˜½Á•¹}½ÕÑÁÕÑ}‘¥È¡Í•±˜¤è(€€€€€€€¥˜¹½ĞÍ•±˜¹É•™É•Í¡}½ÕÑÁÕÑ}‘¥È ¤è(€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€Á…Ñ €ôA…Ñ ¡Í•±˜¹½ÕÑÁÕÑ}‘¥È¹•Ğ ¤¤(€€€€€€€Á…Ñ ¹µ­‘¥È¡Á…É•¹ÑÌõQÉÕ”°•á¥ÍÑ}½¬õQÉÕ”¤(€€€€€€€ÍÕ‰ÁÉ½•ÍÌ¹A½Á•¸¡l‰•áÁ±½É•Èˆ°ÍÑÈ¡Á…Ñ ¥t¤((€€€‘•˜½Á•¹}±…ÍÑ}É•ÍÕ±Ñ}‘¥È¡Í•±˜¤è(€€€€€€€¥˜¹½ĞÍ•±˜¹±…ÍÑ}É•ÍÕ±Ñ}‘¥È½È¹½ĞÍ•±˜¹±…ÍÑ}É•ÍÕ±Ñ}‘¥È¹•á¥ÍÑÌ ¤è(€€€€€€€€€€€µ•ÍÍ…•‰½à¹Í¡½İİ…É¹¥¹œ ‹šjš^ƒîOšzpˆ°€‹–öO–&7¢şcšÊ‡šr'–>¿š&O–òjš"C–*îOšzsšZ’îÛ–’çˆ¤(€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€ÍÕ‰ÁÉ½•ÍÌ¹A½Á•¸¡l‰•áÁ±½É•Èˆ°ÍÑÈ¡Í•±˜¹±…ÍÑ}É•ÍÕ±Ñ}‘¥È¥t¤((€€€‘•˜•áÑÉ…Ñ}É•ÍÕ±Ñ}‘¥È¡Í•±˜°½ÕÑÁÕĞèÍÑÈ¤€´øA…Ñ ğ9½¹”è(€€€€€€€µ…Ñ¡•Ì€ôÉ”¹™¥¹‘…±°¡È‰y=,éqÌ¨ ¸¬ü¥qÌ¨ˆ°½ÕÑÁÕĞ°™±…ÌõÉ”¹5U1Q%1%9¤(€€€€€€€¥˜¹½Ğµ…Ñ¡•Ìè(€€€€€€€€€€€É•ÑÕÉ¸9½¹”(€€€€€€€É•ÍÕ±Ñ}Á…Ñ €ôA…Ñ ¡µ…Ñ¡•Íl´Åt¹ÍÑÉ¥À ¤¹ÍÑÉ¥À œˆœ¤¤(€€€€€€€¥˜É•ÍÕ±Ñ}Á…Ñ ¹¥Í}™¥±” ¤è(€€€€€€€€€€€É•ÑÕÉ¸É•ÍÕ±Ñ}Á…Ñ ¹Á…É•¹Ğ(€€€€€€€¥˜É•ÍÕ±Ñ}Á…Ñ ¹¥Í}‘¥È ¤è(€€€€€€€€€€€É•ÑÕÉ¸É•ÍÕ±Ñ}Á…Ñ (€€€€€€€É•ÑÕÉ¸É•ÍÕ±Ñ}Á…Ñ ¹Á…É•¹Ğ((€€€‘•˜É•µ•µ‰•É}É•ÍÕ±Ñ}‘¥È¡Í•±˜°É•ÍÕ±Ñ}‘¥ÈèA…Ñ ğ9½¹”¤è(€€€€€€€Í•±˜¹±…ÍÑ}É•ÍÕ±Ñ}‘¥È€ôÉ•ÍÕ±Ñ}‘¥È(€€€€€€€Í•±˜¹ÕÁ‘…Ñ•}É•ÍÕ±Ñ}‰ÕÑÑ½¹Ì ¤(€€€€€€€¥˜É•ÍÕ±Ñ}‘¥Èè(€€€€€€€€€€€Í•±˜¹ÍÑ…ÑÕÍ}Ñ•áĞ¹Í•Ğ ‹š"C–*¾ò3–>¿š&O–òîOšzsšZ’îÛ–’äˆ¤((€€€‘•˜ÕÁ‘…Ñ•}É•ÍÕ±Ñ}‰ÕÑÑ½¹Ì¡Í•±˜¤è(€€€€€€€•¹…‰±•€ô‰½½°¡Í•±˜¹±…ÍÑ}É•ÍÕ±Ñ}‘¥È…¹Í•±˜¹±…ÍÑ}É•ÍÕ±Ñ}‘¥È¹•á¥ÍÑÌ ¤¤(€€€€€€€™½È‰ÕÑÑ½¸¥¸Í•±˜¹É•ÍÕ±Ñ}‰ÕÑÑ½¹Ìè(€€€€€€€€€€€‰ÕÑÑ½¸¹½¹™¥ÕÉ”¡ÍÑ…Ñ”ô‰¹½Éµ…°ˆ¥˜•¹…‰±••±Í”€‰‘¥Í…‰±•ˆ¤((€€€‘•˜İÉ¥Ñ”¡Í•±˜°Ñ•áĞ¤è(€€€€€€€¥˜Ñ¡É•…‘¥¹œ¹ÕÉÉ•¹Ñ}Ñ¡É•… ¤¥ÌÑ¡É•…‘¥¹œ¹µ…¥¹}Ñ¡É•… ¤è(€€€€€€€€€€€Í•±˜¹}…ÁÁ•¹‘}±½œ¡Ñ•áĞ¤(€€€€€€€•±Í”è(€€€€€€€€€€€Í•±˜¹É½½Ğ¹…™Ñ•È À°Í•±˜¹}…ÁÁ•¹‘}±½œ°Ñ•áĞ¤((€€€‘•˜}…ÁÁ•¹‘}±½œ¡Í•±˜°Ñ•áĞ¤è(€€€€€€€Í•±˜¹±½œ¹¥¹Í•ÉĞ ‰•¹ˆ°Ñ•áĞ€¬€‰q¸ˆ¤(€€€€€€€Í•±˜¹±½œ¹Í•” ‰•¹ˆ¤((€€€‘•˜É•ÅÕ¥É•}™¥±•Ì¡Í•±˜°­•åÌ¤è(€€€€€€€µ¥ÍÍ¥¹œ€ôl(€€€€€€€€€€€Í•±˜¹%1}1	1L¹•Ğ¡­•ä°­•ä¤(€€€€€€€€€€€™½È­•ä¥¸­•åÌ(€€€€€€€€€€€¥˜¹½ĞÍ•±˜¹Ù…ÉÍm­•åt¹•Ğ ¤½È¹½ĞA…Ñ ¡Í•±˜¹Ù…ÉÍm­•åt¹•Ğ ¤¤¹•á¥ÍÑÌ ¤(€€€€€€€t(€€€€€€€¥˜µ¥ÍÍ¥¹œè(€€€€€€€€€€€µ•ÍÍ…•‰½à¹Í¡½İ•ÉÉ½È (€€€€€€€€€€€€€€€€‹šZ’îÛòë–’Äˆ°(€€€€€€€€€€€€€€€€‹¢şg’êošZ’îÛšÊ‡šr'š&û–"Ã¢.—šb¿–&7¦v‹š¶—¦ª“–ŞË¦'š.§¢ş¾ò3¢¾ß
-ç–ï¦†Û¦£Šs¢«–*£¢¾–"¯Šwš"[–n{–"Ã–¾ç–êSš¶—¦ª“šš~—¾òiq¸ˆ(€€€€€€€€€€€€€€€€¬€‰q¸ˆ¹©½¥¸¡µ¥ÍÍ¥¹œ¤°(€€€€€€€€€€€€¤(€€€€€€€€€€€É•ÑÕÉ¸…±Í”(€€€€€€€É•ÑÕÉ¸QÉÕ”((€€€‘•˜Í•Ñ}ÉÕ¹¹¥¹œ¡Í•±˜°ÉÕ¹¹¥¹œè‰½½°¤è(€€€€€€€Í•±˜¹ÉÕ¹¹¥¹œ€ôÉÕ¹¹¥¹œ(€€€€€€€¥˜ÉÕ¹¹¥¹œè(€€€€€€€€€€€Í•±˜¹ÍÑ…ÑÕÍ}Ñ•áĞ¹Í•Ğ ‹–’B’â·¾ò3¢¾ß¶'–úˆ¤(€€€€€€€•±¥˜Í•±˜¹±…ÍÑ}É•ÍÕ±Ñ}‘¥È…¹Í•±˜¹±…ÍÑ}É•ÍÕ±Ñ}‘¥È¹•á¥ÍÑÌ ¤è(€€€€€€€€€€€Í•±˜¹ÍÑ…ÑÕÍ}Ñ•áĞ¹Í•Ğ ‹š"C–*¾ò3–>¿š&O–òîOšzsšZ’îÛ–’äˆ¤(€€€€€€€•±Í”è(€€€€€€€€€€€Í•±˜¹ÍÑ…ÑÕÍ}Ñ•áĞ¹Í•Ğ ‹–ÂÇî¨ˆ¤(€€€€€€€™½È‰ÕÑÑ½¸¥¸Í•±˜¹…Ñ¥½¹}‰ÕÑÑ½¹Ìè(€€€€€€€€€€€‰ÕÑÑ½¸¹½¹™¥ÕÉ”¡ÍÑ…Ñ”ô‰‘¥Í…‰±•ˆ¥˜ÉÕ¹¹¥¹œ•±Í”€‰¹½Éµ…°ˆ¤(€€€€€€€¥˜ÉÕ¹¹¥¹œè(€€€€€€€€€€€™½È‰ÕÑÑ½¸¥¸Í•±˜¹É•ÍÕ±Ñ}‰ÕÑÑ½¹Ìè(€€€€€€€€€€€€€€€‰ÕÑÑ½¸¹½¹™¥ÕÉ”¡ÍÑ…Ñ”ô‰‘¥Í…‰±•ˆ¤(€€€€€€€•±Í”è(€€€€€€€€€€€Í•±˜¹ÕÁ‘…Ñ•}É•ÍÕ±Ñ}‰ÕÑÑ½¹Ì ¤((€€€‘•˜ÉÕ¹}ÍÉ¥ÁĞ¡Í•±˜°ÍÉ¥ÁÑ}¹…µ”èÍÑÈ°…ÉÌè±¥ÍÑmÍÑÉt¤€´øÑÕÁ±•m¥¹Ğ°ÍÑÈ°ÍÑÉtè(€€€€€€€µ½‘Õ±”€ôMI%AQ}5=U1MmÍÉ¥ÁÑ}¹…µ•t(€€€€€€€½±‘}…ÉØ€ôÍåÌ¹…ÉÙlét(€€€€€€€ÍÑ‘½ÕĞ€ô¥¼¹MÑÉ¥¹%< ¤(€€€€€€€ÍÑ‘•ÉÈ€ô¥¼¹MÑÉ¥¹%< ¤(€€€€€€€ÑÉäè(€€€€€€€€€€€ÍåÌ¹…ÉØ€ômÍÉ¥ÁÑ}¹…µ•t€¬…ÉÌ(€€€€€€€€€€€İ¥Ñ ½¹Ñ•áÑ±¥ˆ¹É•‘¥É•Ñ}ÍÑ‘½ÕĞ¡ÍÑ‘½ÕĞ¤°½¹Ñ•áÑ±¥ˆ¹É•‘¥É•Ñ}ÍÑ‘•ÉÈ¡ÍÑ‘•ÉÈ¤è(€€€€€€€€€€€€€€€½‘”€ôµ½‘Õ±”¹µ…¥¸ ¤(€€€€€€€™¥¹…±±äè(€€€€€€€€€€€ÍåÌ¹…ÉØ€ô½±‘}…ÉØ(€€€€€€€É•ÑÕÉ¸¥¹Ğ¡½‘”½È€À¤°ÍÑ‘½ÕĞ¹•ÑÙ…±Õ” ¤°ÍÑ‘•ÉÈ¹•ÑÙ…±Õ” ¤((€€€‘•˜ÉÕ¹}µ¡Í•±˜°Ñ¥Ñ±”°µ¤è(€€€€€€€¥˜Í•±˜¹ÉÕ¹¹¥¹œè(€€€€€€€€€€€µ•ÍÍ…•‰½à¹Í¡½İİ…É¹¥¹œ ‹š¶–r£–’Bˆ°€‹–öO–&7’îï–*‡¢şcšÊ‡šr'îOšv¾ò3¢¾ß¶'–ú¢şC¢†3š^—–ş_šbû’ëîOšzsˆ¤(€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€Í•±˜¹±…ÍÑ}É•ÍÕ±Ñ}‘¥È€ô9½¹”(€€€€€€€Í•±˜¹ÕÁ‘…Ñ•}É•ÍÕ±Ñ}‰ÕÑÑ½¹Ì ¤(€€€€€€€Í•±˜¹Í•Ñ}ÉÕ¹¹¥¹œ¡QÉÕ”¤((€€€€€€€‘•˜İ½É­•È ¤è(€€€€€€€€€€€Í•±˜¹İÉ¥Ñ” ˆˆ¤(€€€€€€€€€€€Í•±˜¹İÉ¥Ñ”¡˜‹–ò–/¾òiíÑ¥Ñ±•ôˆ¤(€€€€€€€€€€€É•ÑÕÉ¹½‘”°ÍÑ‘½ÕĞ°ÍÑ‘•ÉÈ€ôÍ•±˜¹ÉÕ¹}ÍÉ¥ÁĞ¡µ‘lÁt°µ‘lÄét¤(€€€€€€€€€€€¥˜ÍÑ‘½ÕĞ¹ÍÑÉ¥À ¤è(€€€€€€€€€€€€€€€Í•±˜¹İÉ¥Ñ”¡ÍÑ‘½ÕĞ¹ÍÑÉ¥À ¤¤(€€€€€€€€€€€¥˜ÍÑ‘•ÉÈ¹ÍÑÉ¥À ¤è(€€€€€€€€€€€€€€€Í•±˜¹İÉ¥Ñ”¡ÍÑ‘•ÉÈ¹ÍÑÉ¥À ¤¤(€€€€€€€€€€€¥˜É•ÑÕÉ¹½‘”€ôô€Àè(€€€€€€€€€€€€€€€Í•±˜¹İÉ¥Ñ” ‹îOšzs¾òkš"C–*|ˆ¤(€€€€€€€€€€€€€€€É•ÍÕ±Ñ}‘¥È€ôÍ•±˜¹•áÑÉ…Ñ}É•ÍÕ±Ñ}‘¥È¡ÍÑ‘½ÕĞ¤(€€€€€€€€€€€€€€€Í•±˜¹É½½Ğ¹…™Ñ•È À°±…µ‰‘„èÍ•±˜¹É•µ•µ‰•É}É•ÍÕ±Ñ}‘¥È¡É•ÍÕ±Ñ}‘¥È¤¤(€€€€€€€€€€€€€€€¥˜É•ÍÕ±Ñ}‘¥Èè(€€€€€€€€€€€€€€€€€€€Í•±˜¹İÉ¥Ñ”¡˜‹îOšzsšZ’îÛ–’ç¾òiíÉ•ÍÕ±Ñ}‘¥Éôˆ¤(€€€€€€€€€€€•±Í”è(€€€€€€€€€€€€€€€Í•±˜¹İÉ¥Ñ”¡˜‹îOšzs¾òk–’Ç¢Ò—¾ò3¦–ë‚íÉ•ÑÕÉ¹½‘•ôˆ¤(€€€€€€€€€€€Í•±˜¹É½½Ğ¹…™Ñ•È À°±…µ‰‘„èÍ•±˜¹Í•Ñ}ÉÕ¹¹¥¹œ¡…±Í”¤¤((€€€€€€€Ñ¡É•…‘¥¹œ¹Q¡É•…¡Ñ…É•Ğõİ½É­•È°‘…•µ½¸õQÉÕ”¤¹ÍÑ…ÉĞ ¤((€€€‘•˜‰…Í•}µ¡Í•±˜°ÍÉ¥ÁĞ¤è(€€€€€€€¥˜¹½ĞÍ•±˜¹É•™É•Í¡}½ÕÑÁÕÑ}‘¥È ¤è(€€€€€€€€€€€É…¥Í”Y…±Õ•ÉÉ½È ‰¥¹Ù…±¥‘…Ñ”ˆ¤(€€€€€€€É•ÑÕÉ¸mÍÉ¥ÁĞ°€ˆ´µ‘…Ñ”ˆ°Í•±˜¹Ù…ÉÍl‰‘…Ñ”‰t¹•Ğ ¤°€ˆ´µ½ÕÑÁÕĞµÉ½½Ğˆ°Í•±˜¹½ÕÑÁÕÑ}‘¥È¹•Ğ ¥t((€€€‘•˜ÉÕ¹}Í˜¡Í•±˜¤è(€€€€€€€¥˜¹½ĞÍ•±˜¹É•ÅÕ¥É•}™¥±•Ì¡l‰‘Á}½É‘•ÉÌˆ°€‰Í­Ôˆ°€‰Í™}Ñ•µÁ±…Ñ”‰t¤è(€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€‰ÕÍ¥¹•ÍÍ}ÑåÁ”€ôÍ•±˜¹Ù…ÉÍl‰Í™}‰ÕÍ¥¹•ÍÍ}ÑåÁ”‰t¹•Ğ ¤(€€€€€€€¥˜‰ÕÍ¥¹•ÍÍ}ÑåÁ”¹½Ğ¥¸•¹•É…Ñ•}Í™}¥¹Ñ•É¹…Ñ¥½¹…±}Ñ•µÁ±…Ñ”¹M}	UM%9MM}QeALè(€€€€€€€€€€€µ•ÍÍ…•‰½à¹Í¡½İ•ÉÉ½È ‹¢¾ß¦'š.§’âk–*‡Æï–z,ˆ°€‹¢¾ß–#¦'š.§šr³š&ç¦†ë’âÃ–n÷¦f¢º‹–6W’öÿR£j’âk–*‡Æï–z/ˆ¤(€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€Í•±˜¹ÉÕ¹}µ (€€€€€€€€€€€€‹²°Çš¶”ƒRš"C¦†ë’âÃ–n÷¦f’â+’òƒš¢‡švüˆ°(€€€€€€€€€€€Í•±˜¹‰…Í•}µ ‰•¹•É…Ñ•}Í™}¥¹Ñ•É¹…Ñ¥½¹…±}Ñ•µÁ±…Ñ”¹Áäˆ¤(€€€€€€€€€€€€¬l(€€€€€€€€€€€€€€€€ˆ´µ‘Àµ½É‘•ÉÌµÍØˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰‘Á}½É‘•ÉÌ‰t¹•Ğ ¤°(€€€€€€€€€€€€€€€€ˆ´µÍ­Ôµá±Íàˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰Í­Ô‰t¹•Ğ ¤°(€€€€€€€€€€€€€€€€ˆ´µÍ˜µÑ•µÁ±…Ñ”µá±Í´ˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰Í™}Ñ•µÁ±…Ñ”‰t¹•Ğ ¤°(€€€€€€€€€€€€€€€€ˆ´µ‰ÕÍ¥¹•ÍÌµÑåÁ”ˆ°(€€€€€€€€€€€€€€€‰ÕÍ¥¹•ÍÍ}ÑåÁ”°(€€€€€€€€€€€€€€€€ˆ´µ‰…ÑÑ•Éäˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰Í™}‰…ÑÑ•Éä‰t¹•Ğ ¤°(€€€€€€€€€€€t°(€€€€€€€€¤((€€€‘•˜ÉÕ¹}åÕ¸¡Í•±˜¤è(€€€€€€€¥˜¹½ĞÍ•±˜¹É•ÅÕ¥É•}™¥±•Ì¡l‰‘Á}½É‘•ÉÌˆ°€‰Í­Ôˆ°€‰åÕ¹}Ñ•µÁ±…Ñ”‰t¤è(€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€Í•±˜¹ÉÕ¹}µ (€€€€€€€€€€€€‹²°Çš¶”ƒRš"C’êG¦S’â+’òƒš¢‡švüˆ°(€€€€€€€€€€€Í•±˜¹‰…Í•}µ ‰•¹•É…Ñ•}åÕ¹•áÁÉ•ÍÍ}Ñ•µÁ±…Ñ”¹Áäˆ¤(€€€€€€€€€€€€¬l(€€€€€€€€€€€€€€€€ˆ´µ‘Àµ½É‘•ÉÌµÍØˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰‘Á}½É‘•ÉÌ‰t¹•Ğ ¤°(€€€€€€€€€€€€€€€€ˆ´µÍ­Ôµá±Íàˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰Í­Ô‰t¹•Ğ ¤°(€€€€€€€€€€€€€€€€ˆ´µåÕ¹•áÁÉ•ÍÌµÑ•µÁ±…Ñ”µá±Íàˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰åÕ¹}Ñ•µÁ±…Ñ”‰t¹•Ğ ¤°(€€€€€€€€€€€t°(€€€€€€€€¤((€€€‘•˜ÉÕ¹}‘À¡Í•±˜¤è(€€€€€€€Á±…Ñ™½É´€ôÍ•±˜¹Ù…ÉÍl‰Í¡¥ÁÁ¥¹}Á±…Ñ™½É´‰t¹•Ğ ¤(€€€€€€€Í½ÕÉ•}­•ä€ô€‰Í™}½É‘•ÉÌˆ¥˜Á±…Ñ™½É´€ôô€‰Í˜ˆ•±Í”€‰åÕ¹}½É‘•ÉÌˆ(€€€€€€€¥˜¹½ĞÍ•±˜¹É•ÅÕ¥É•}™¥±•Ì¡mÍ½ÕÉ•}­•ä°€‰‘Á}Ñ•µÁ±…Ñ”‰t¤è(€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€‘Á}½É‘•ÉÌ€ôA…Ñ ¡Í•±˜¹Ù…ÉÍl‰‘Á}½É‘•ÉÌ‰t¹•Ğ ¤¤(€€€€€€€¥˜¹½Ğ‘Á}½É‘•ÉÌ¹¥Í}™¥±” ¤è(€€€€€€€€€€€µ•ÍÍ…•‰½à¹Í¡½İ•ÉÉ½È (€€€€€€€€€€€€€€€€‹òë–ÂGšr³š&ä@ƒ¢º‹–6Tˆ°(€€€€€€€€€€€€€€€€‹’âë¦bËš¶‹–n{–†¯¦Rgš&çš²‡¾ò3¢¾ß–#–º3š"C²°Çš¶—²°Ëš¶—’òk¢«–*£–’7R£²°Çš¶—j@ƒ¢º‹–6TM[¾ò3š^ƒ¦r–7š²‡¦'š.§ˆ°(€€€€€€€€€€€€¤(€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€Í½ÕÉ•}…ÉÌ€ô€ (€€€€€€€€€€€lˆ´µÍ˜µ¥¹Ñ•É¹…Ñ¥½¹…°µ™¥±”ˆ°Í•±˜¹Ù…ÉÍl‰Í™}½É‘•ÉÌ‰t¹•Ğ ¥t(€€€€€€€€€€€¥˜Á±…Ñ™½É´€ôô€‰Í˜ˆ(€€€€€€€€€€€•±Í”lˆ´µåÕ¹•áÁÉ•ÍÌµá±Íàˆ°Í•±˜¹Ù…ÉÍl‰åÕ¹}½É‘•ÉÌ‰t¹•Ğ ¥t(€€€€€€€€¤(€€€€€€€Ñ¥Ñ±”€ô€‹²°Ëš¶”ƒRš"C¦†ë’âÀ@ƒ–n{–†¯š¢‡švüˆ¥˜Á±…Ñ™½É´€ôô€‰Í˜ˆ•±Í”€‹²°Ëš¶”ƒRš"C’êG¦P@ƒ–n{–†¯š¢‡švüˆ(€€€€€€€Í•±˜¹ÉÕ¹}µ (€€€€€€€€€€€Ñ¥Ñ±”°(€€€€€€€€€€€Í•±˜¹‰…Í•}µ ‰•¹•É…Ñ•}‘Á}Í¡¥Áµ•¹Ñ}ÕÁ±½…¹Áäˆ¤(€€€€€€€€€€€€¬Í½ÕÉ•}…ÉÌ(€€€€€€€€€€€€¬l(€€€€€€€€€€€€€€€€ˆ´µ‘Àµ½É‘•ÉÌµÍØˆ°(€€€€€€€€€€€€€€€ÍÑÈ¡‘Á}½É‘•ÉÌ¤°(€€€€€€€€€€€€€€€€ˆ´µÍ¡¥Áµ•¹ĞµÑ•µÁ±…Ñ”µá±Íàˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰‘Á}Ñ•µÁ±…Ñ”‰t¹•Ğ ¤°(€€€€€€€€€€€t°(€€€€€€€€¤((€€€‘•˜ÉÕ¹}±…‰•±Ì¡Í•±˜¤è(€€€€€€€¥˜Í•±˜¹Ù…ÉÍl‰Í¡¥ÁÁ¥¹}Á±…Ñ™½É´‰t¹•Ğ ¤€ôô€‰Í˜ˆè(€€€€€€€€€€€¥˜¹½ĞÍ•±˜¹É•ÅÕ¥É•}™¥±•Ì¡l‰Í™}±…‰•±}Á‘˜‰t¤è(€€€€€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€€€€€Í™}½É‘•ÉÌ€ôA…Ñ ¡Í•±˜¹Ù…ÉÍl‰Í™}½É‘•ÉÌ‰t¹•Ğ ¤¤(€€€€€€€€€€€¥˜¹½ĞÍ™}½É‘•ÉÌ¹¥Í}™¥±” ¤è(€€€€€€€€€€€€€€€µ•ÍÍ…•‰½à¹Í¡½İ•ÉÉ½È (€€€€€€€€€€€€€€€€€€€€‹òë–ÂGšr³š&ç¦†ë’âÃ¢º‹–6Tˆ°(€€€€€€€€€€€€€€€€€€€€‹’âë¦bËš¶‹šò?–6Wš"[šŞß–—–Û’î[š&çš²‡¦v‹–6W¾ò3¢¾ß–#–º3š"C²°Ëš¶—²°Ïš¶—’òk¢«–*£–’7R£¦†ë’âÃ¢º‹–6WšVÃš6»¾ò3š^ƒ¦r–7š²‡¦'š.§ˆ°(€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€€€€€Í•±˜¹ÉÕ¹}µ (€€€€€€€€€€€€€€€€‹²°Ïš¶”ƒš2'–¾šZç–O–B7š.–"¦†ë’âÃ¦v‹–6Tˆ°(€€€€€€€€€€€€€€€Í•±˜¹‰…Í•}µ ‰ÍÁ±¥Ñ}Í™}±…‰•±Í}‰å}Í•¹‘•È¹Áäˆ¤(€€€€€€€€€€€€€€€€¬l(€€€€€€€€€€€€€€€€€€€€ˆ´µÁ‘˜ˆ°(€€€€€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰Í™}±…‰•±}Á‘˜‰t¹•Ğ ¤°(€€€€€€€€€€€€€€€€€€€€ˆ´µÍ˜µ¥¹Ñ•É¹…Ñ¥½¹…°µ™¥±”ˆ°(€€€€€€€€€€€€€€€€€€€ÍÑÈ¡Í™}½É‘•ÉÌ¤°(€€€€€€€€€€€€€€€t°(€€€€€€€€€€€€¤(€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€¥˜¹½ĞÍ•±˜¹É•ÅÕ¥É•}™¥±•Ì¡l‰±…‰•±}é¥Àˆ°€‰åÕ¹}½É‘•ÉÌˆ°€‰‘Á}½É‘•ÉÌˆ°€‰Í­Ô‰t¤è(€€€€€€€€€€€É•ÑÕÉ¸(€€€€€€€Í•±˜¹ÉÕ¹}µ (€€€€€€€€€€€€‹²°Ïš¶”ƒš2$M-Tƒ–"š.¦v‹–6Tˆ°(€€€€€€€€€€€Í•±˜¹‰…Í•}µ ‰Í½ÉÑ}åÕ¹•áÁÉ•ÍÍ}±…‰•±Í}‰å}Í­Ô¹Áäˆ¤(€€€€€€€€€€€€¬l(€€€€€€€€€€€€€€€€ˆ´µé¥Àˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰±…‰•±}é¥À‰t¹•Ğ ¤°(€€€€€€€€€€€€€€€€ˆ´µåÕ¹•áÁÉ•ÍÌµá±Íàˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰åÕ¹}½É‘•ÉÌ‰t¹•Ğ ¤°(€€€€€€€€€€€€€€€€ˆ´µ‘Àµ½É‘•ÉÌµÍØˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰‘Á}½É‘•ÉÌ‰t¹•Ğ ¤°(€€€€€€€€€€€€€€€€ˆ´µÍ­Ôµá±Íàˆ°(€€€€€€€€€€€€€€€Í•±˜¹Ù…ÉÍl‰Í­Ô‰t¹•Ğ ¤°(€€€€€€€€€€€t°(€€€€€€€€¤(()¥˜}}¹…µ•}|€ôô€‰}}µ…¥¹}|ˆè(€€€…ÁÁ}É½½Ğ€ôÑ¬¹Q¬ ¤(€€€ÁÀ¡…ÁÁ}É½½Ğ¤(€€€…ÁÁ}É½½Ğ¹µ…¥¹±½½À ¤(
+            text="è¿è¡Œæ—¥å¿—",
+            bg=self.COLORS["bg"],
+            fg=self.COLORS["ink"],
+            font=("Microsoft YaHei UI", 10, "bold"),
+        ).grid(row=0, column=0, sticky="w")
+        tk.Label(
+            bar,
+            textvariable=self.output_dir,
+            bg=self.COLORS["bg"],
+            fg=self.COLORS["muted"],
+            font=("Microsoft YaHei UI", 8),
+        ).grid(row=0, column=1, sticky="e")
+
+        self.log = tk.Text(
+            log_frame,
+            height=3,
+            wrap="word",
+            relief="flat",
+            bd=0,
+            bg=self.COLORS["log_bg"],
+            fg=self.COLORS["log_text"],
+            insertbackground=self.COLORS["log_text"],
+            font=("Cascadia Mono", 9),
+            padx=12,
+            pady=7,
+        )
+        self.log.grid(row=1, column=0, sticky="nsew")
+
+    def active_step(self) -> dict[str, object]:
+        step = dict(self.steps[self.current_step])
+        if self.current_step == 0 and self.vars["shipping_platform"].get() == "sf":
+            step.update(
+                {
+                    "short": "é¡ºä¸°ä¸Šä¼ ",
+                    "nav": "DPè®¢å• -> é¡ºä¸°æ¨¡æ¿",
+                    "title": "ç”Ÿæˆé¡ºä¸°å›½é™…ä¸Šä¼ æ¨¡æ¿",
+                    "summary": "ä» DP è®¢å• CSV ç”Ÿæˆé¡ºä¸°å›½é™…æ‰¹é‡å¯¼å…¥ Excelã€‚",
+                    "config_note": "ä½¿ç”¨å›ºå®šé…ç½®ï¼šSKUå•†å“åº“ã€é¡ºä¸°å›½é™…æ ‡å‡†æ¨¡æ¿ã€‚è¯·ç¡®è®¤ä¸šåŠ¡ç±»å‹å’Œæ˜¯å¦å¸¦ç”µã€‚",
+                    "button": "ç”Ÿæˆé¡ºä¸°æ¨¡æ¿",
+                    "after": "ç”Ÿæˆååˆ°é¡ºä¸°å›½é™…åå°ä¸Šä¼ ã€‚åˆ›å»ºè®¢å•æˆåŠŸåï¼Œä¸‹è½½â€œé¡ºä¸°è®¢å•æ•°æ®â€ï¼Œå†åšç¬¬2æ­¥ã€‚",
+                    "command": self.run_sf,
+                }
+            )
+        elif self.current_step == 1 and self.vars["shipping_platform"].get() == "sf":
+            step.update(
+                {
+                    "nav": "é¡ºä¸°è®¢å• -> DPä¸Šä¼ ",
+                    "title": "ç”Ÿæˆ DP é¡ºä¸°å‘è´§å›å¡«æ¨¡æ¿",
+                    "summary": "æŠŠé¡ºä¸°å›½é™…è¿å•å·æ•´ç†æˆ DP åå°å¯ä¸Šä¼ çš„å‘è´§æ–‡ä»¶ã€‚",
+                    "when": "é¡ºä¸°å›½é™…è®¢å•å·²åˆ›å»ºï¼Œå¹¶å·²ä¸‹è½½â€œé¡ºä¸°è®¢å•æ•°æ®â€Excel åä½¿ç”¨ã€‚",
+                    "files": [
+                        (
+                            "æœ¬æ¬¡é¡ºä¸°è®¢å•æ•°æ® Excel",
+                            "sf_orders",
+                            [("Excel", "*.xls *.xlsx"), ("Excel 97-2003", "*.xls"), ("Excel å·¥ä½œç°¿", "*.xlsx")],
+                        )
+                    ],
+                    "config_note": "ä½¿ç”¨å›ºå®šé…ç½®ï¼šDPå‘è´§æ¨¡æ¿ã€‚æ‰¿è¿å•†å›ºå®šä¸º SF INTERNATIONALã€‚",
+                    "button": "ç”Ÿæˆé¡ºä¸° DP å›å¡«",
+                    "after": "ç”Ÿæˆåä¸Šä¼ åˆ° DropShipZone åå°ã€‚å®Œæˆåä¸‹è½½é¡ºä¸°åˆå¹¶é¢å• PDFï¼Œå†åšç¬¬3æ­¥ã€‚",
+                    "command": self.run_dp,
+                }
+            )
+        elif self.current_step == 2 and self.vars["shipping_platform"].get() == "sf":
+            step.update(
+                {
+                    "nav": "é¡ºä¸°é¢å•PDF -> å¯„æ–¹åˆ†ç»„",
+                    "title": "æŒ‰å¯„æ–¹å§“åæ‹†åˆ†é¡ºä¸°é¢å•",
+                    "summary": "è¯»å–æ¯é¡µé¢å•ä¸­çš„å¯„æ–¹å§“åï¼Œå¹¶ä¸ç¬¬2æ­¥è¿å•é€å•æ ¸å¯¹åç”Ÿæˆä¾›åº”å•† PDFã€‚",
+                    "when": "ç¬¬2æ­¥å·²å®Œæˆä¸”é¡ºä¸°å›½é™…åˆå¹¶é¢å• PDF å·²ä¸‹è½½åä½¿ç”¨ã€‚",
+                    "files": [("æœ¬æ¬¡é¡ºä¸°å›½é™…é¢å• PDF", "sf_label_pdf", [("PDF", "*.pdf")])],
+                    "config_note": "è‡ªåŠ¨æ²¿ç”¨ç¬¬2æ­¥é¡ºä¸°è®¢å•æ•°æ®åšå®Œæ•´æ€§æ ¡éªŒï¼›ä¸éœ€è¦å†æ¬¡é€‰æ‹©ï¼Œä¹Ÿä¸ä½¿ç”¨ SKU å•†å“åº“ã€‚",
+                    "button": "æŒ‰å¯„æ–¹å§“åæ‹†åˆ†",
+                    "after": "æ¯ä¸ªå¯„æ–¹ä¼šå¾—åˆ°ä¸€ä¸ªåˆå¹¶ PDFï¼›æ€»ç›®å½•ä¿ç•™åˆ†ç»„æ±‡æ€»å’Œæ ¡éªŒæŠ¥å‘Šã€‚",
+                    "command": self.run_labels,
+                }
+            )
+        return step
+
+    def select_shipping_platform(self, platform: str):
+        if self.running:
+            messagebox.showwarning("æ­£åœ¨å¤„ç†", "å½“å‰ä»»åŠ¡è¿˜æ²¡æœ‰ç»“æŸï¼Œè¯·ç­‰å¾…å¤„ç†å®Œæˆåå†åˆ‡æ¢å¹³å°ã€‚")
+            return
+        self.vars["shipping_platform"].set(platform)
+        if self.nav_buttons:
+            if platform == "sf":
+                self.nav_buttons[0].configure(text="01  é¡ºä¸°ä¸Šä¼   DPè®¢å• -> é¡ºä¸°æ¨¡æ¿")
+                self.nav_buttons[1].configure(text="02  DPå›å¡«  é¡ºä¸°è®¢å• -> DPä¸Šä¼ ")
+                self.nav_buttons[2].configure(text="03  é¢å•åˆ†æ‹†  é¡ºä¸°PDF -> å¯„æ–¹åˆ†ç»„")
+            else:
+                self.nav_buttons[0].configure(text="01  äº‘é€”ä¸Šä¼   DPè®¢å• -> äº‘é€”æ¨¡æ¿")
+                self.nav_buttons[1].configure(text="02  DPå›å¡«  äº‘é€”è®¢å• -> DPä¸Šä¼ ")
+                self.nav_buttons[2].configure(text="03  é¢å•åˆ†æ‹£  é¢å•ZIP -> ä¾›åº”å•†åŒ…")
+        if self.current_step in (0, 1, 2):
+            self.render_step()
+
+    def select_step(self, index: int):
+        self.current_step = index
+        for idx, button in enumerate(self.nav_buttons):
+            if idx == index:
+                button.configure(
+                    bg=self.COLORS["surface"],
+                    fg=self.COLORS["accent_dark"],
+                    activebackground="#ffffff",
+                    activeforeground=self.COLORS["accent_dark"],
+                )
+            else:
+                button.configure(
+                    bg="#dfe8f3",
+                    fg=self.COLORS["muted"],
+                    activebackground="#e8eff7",
+                    activeforeground=self.COLORS["ink"],
+                )
+        self.render_step()
+
+    def render_step(self):
+        for child in self.step_panel.winfo_children():
+            child.destroy()
+        self.action_buttons.clear()
+        self.result_buttons.clear()
+
+        step = self.active_step()
+        self.step_panel.grid_columnconfigure(0, weight=1)
+        for row in range(4):
+            self.step_panel.grid_rowconfigure(row, weight=0)
+
+        header = tk.Frame(self.step_panel, bg=self.COLORS["surface"])
+        header.grid(row=0, column=0, sticky="ew")
+        header.grid_columnconfigure(1, weight=1)
+
+        tk.Label(
+            header,
+            text=f"STEP {step['index']}",
+            bg=self.COLORS["accent_soft"],
+            fg=self.COLORS["accent_dark"],
+            font=("Segoe UI", 9, "bold"),
+            width=8,
+            padx=6,
+            pady=5,
+        ).grid(row=0, column=0, rowspan=2, sticky="w", padx=(0, 13))
+        tk.Label(
+            header,
+            text=step["title"],
+            bg=self.COLORS["surface"],
+            fg=self.COLORS["ink"],
+            font=("Microsoft YaHei UI", 16, "bold"),
+        ).grid(row=0, column=1, sticky="w")
+        tk.Label(
+            header,
+            text=f"{step['summary']}  {step['when']}",
+            bg=self.COLORS["surface"],
+            fg=self.COLORS["muted"],
+            font=("Microsoft YaHei UI", 9),
+            wraplength=820,
+            justify="left",
+        ).grid(row=1, column=1, sticky="w", pady=(3, 0))
+
+        body = self.card(self.step_panel, pad=13, bg=self.COLORS["soft"])
+        body.grid(row=1, column=0, sticky="ew", pady=(8, 0))
+        body.grid_columnconfigure(0, weight=1)
+
+        body_head = tk.Frame(body, bg=self.COLORS["soft"])
+        body_head.grid(row=0, column=0, sticky="ew", pady=(0, 5))
+        body_head.grid_columnconfigure(1, weight=1)
+        tk.Label(
+            body_head,
+            text="æœ¬æ¬¡éœ€è¦æä¾›çš„æ–‡ä»¶",
+            bg=self.COLORS["soft"],
+            fg=self.COLORS["ink"],
+            font=("Microsoft YaHei UI", 11, "bold"),
+        ).grid(row=0, column=0, sticky="w")
+        if self.current_step in (0, 1, 2):
+            self.platform_selector(body_head).grid(row=0, column=1, sticky="w", padx=(18, 0))
+
+        fixed_tip = tk.Frame(body_head, bg=self.COLORS["soft"])
+        fixed_tip.grid(row=0, column=2, sticky="e", padx=(12, 0))
+        sf_sender_split = self.current_step == 2 and self.vars["shipping_platform"].get() == "sf"
+        tk.Label(
+            fixed_tip,
+            text="æ— éœ€å›ºå®šé…ç½®" if sf_sender_split else "å›ºå®šé…ç½®",
+            bg=self.COLORS["soft"],
+            fg=self.COLORS["muted"],
+            font=("Microsoft YaHei UI", 9),
+        ).pack(side="left")
+        self.info_dot(
+            fixed_tip,
+            (
+                "é¡ºä¸°é¢å•ä¼šè‡ªåŠ¨ä½¿ç”¨ç¬¬2æ­¥è®¢å•æ•°æ®æ ¸å¯¹è¿å•å·ï¼Œæ— éœ€å†æ¬¡é€‰æ‹©ï¼›ä¸ä½¿ç”¨ SKU å•†å“åº“æˆ–å›ºå®šæ¨¡æ¿ã€‚"
+                if sf_sender_split
+                else "SKUå•†å“åº“ã€äº‘é€”/é¡ºä¸°æ ‡å‡†æ¨¡æ¿ã€DPå‘è´§æ¨¡æ¿é€šå¸¸ä¸ç”¨æ¯å¤©é€‰æ‹©ã€‚åªæœ‰æ¨¡æ¿æˆ–SKUä¿¡æ¯æ›´æ–°æ—¶ï¼Œæ‰åˆ°å³ä¸Šè§’â€œå›ºå®šé…ç½®â€é‡Œç»´æŠ¤ã€‚"
+            ),
+            bg=self.COLORS["soft"],
+        ).pack(side="left", padx=(4, 0))
+
+        for row, (label, key, filetypes) in enumerate(step["files"], start=1):
+            self.file_field(body, row, label, key, filetypes)
+
+        if self.current_step == 0 and self.vars["shipping_platform"].get() == "sf":
+            self.sf_options_field(body, len(step["files"]) + 1)
+
+        action = tk.Frame(
+            self.step_panel,
+            bg=self.COLORS["surface"],
+            padx=12,
+            pady=9,
+            highlightthickness=1,
+            highlightbackground=self.COLORS["line"],
+        )
+        action.grid(row=2, column=0, sticky="ew", pady=(8, 0))
+        action.grid_columnconfigure(0, weight=1)
+        action_hint = tk.Frame(action, bg=self.COLORS["surface"])
+        action_hint.grid(row=0, column=0, sticky="w")
+        tk.Label(
+            action_hint,
+            text="ç¡®è®¤æ–‡ä»¶åå¼€å§‹å¤„ç†",
+            bg=self.COLORS["surface"],
+            fg=self.COLORS["ink"],
+            font=("Microsoft YaHei UI", 9, "bold"),
+        ).pack(side="left")
+        self.info_dot(
+            action_hint,
+            f"{step['config_note']}\nå¦‚æœç¼ºå°‘å¿…è¦æ–‡ä»¶ï¼Œå·¥å…·ä¼šåœæ­¢å¹¶åœ¨æ—¥å¿—é‡Œæç¤ºåŸå› ã€‚",
+            bg=self.COLORS["surface"],
+            fg=self.COLORS["muted"],
+        ).pack(side="left", padx=(6, 0))
+        tk.Frame(action_hint, bg=self.COLORS["line"], width=1, height=18).pack(side="left", padx=14)
+        tk.Label(
+            action_hint,
+            text="å®Œæˆå",
+            bg=self.COLORS["surface"],
+            fg=self.COLORS["muted"],
+            font=("Microsoft YaHei UI", 9),
+        ).pack(side="left")
+        self.info_dot(
+            action_hint,
+            step["after"],
+            bg=self.COLORS["surface"],
+            fg=self.COLORS["muted"],
+        ).pack(side="left", padx=(6, 0))
+        start_button = self.primary_button(action, step["button"], step["command"])
+        start_button.grid(row=0, column=1, sticky="e", padx=(12, 0))
+        self.action_buttons.append(start_button)
+        result_button = self.secondary_button(action, "æ‰“å¼€ç»“æœæ–‡ä»¶å¤¹", self.open_last_result_dir, compact=True)
+        result_button.grid(row=0, column=2, sticky="e", padx=(8, 0))
+        self.result_buttons.append(result_button)
+
+        self.set_running(self.running)
+        self.update_result_buttons()
+
+    def platform_selector(self, parent):
+        selector = tk.Frame(
+            parent,
+            bg="#dfe8f3",
+            padx=3,
+            pady=3,
+            highlightthickness=1,
+            highlightbackground="#d4dfec",
+        )
+        self.platform_buttons.clear()
+        current = self.vars["shipping_platform"].get()
+        for column, (key, label) in enumerate((("yunexpress", "äº‘é€”"), ("sf", "é¡ºä¸°å›½é™…"))):
+            selected = key == current
+            button = tk.Button(
+                selector,
+                text=label,
+                command=lambda value=key: self.select_shipping_platform(value),
+                bg=self.COLORS["surface"] if selected else "#dfe8f3",
+                fg=self.COLORS["accent_dark"] if selected else self.COLORS["muted"],
+                activebackground="#ffffff",
+                activeforeground=self.COLORS["accent_dark"],
+                relief="flat",
+                bd=0,
+                padx=12,
+                pady=3,
+                cursor="hand2",
+                font=("Microsoft YaHei UI", 9, "bold"),
+            )
+            button.grid(row=0, column=column, padx=(0, 3) if column == 0 else 0)
+            self.platform_buttons[key] = button
+        return selector
+
+    def sf_options_field(self, parent, row):
+        field = tk.Frame(parent, bg=self.COLORS["soft"])
+        field.grid(row=row, column=0, sticky="ew", pady=(5, 2))
+        field.grid_columnconfigure(1, weight=1)
+
+        tk.Label(
+            field,
+            text="é¡ºä¸°ä¸šåŠ¡ç±»å‹",
+            bg=self.COLORS["soft"],
+            fg=self.COLORS["ink"],
+            font=("Microsoft YaHei UI", 9, "bold"),
+            width=25,
+            anchor="w",
+        ).grid(row=0, column=0, sticky="w", padx=(0, 8))
+        business_type = ttk.Combobox(
+            field,
+            textvariable=self.vars["sf_business_type"],
+            values=generate_sf_international_template.SF_BUSINESS_TYPES,
+            state="readonly",
+            font=("Microsoft YaHei UI", 9),
+        )
+        business_type.grid(row=0, column=1, sticky="ew", padx=(0, 12))
+
+        tk.Label(
+            field,
+            text="æ˜¯å¦å¸¦ç”µ",
+            bg=self.COLORS["soft"],
+            fg=self.COLORS["ink"],
+            font=("Microsoft YaHei UI", 9, "bold"),
+        ).grid(row=0, column=2, sticky="e", padx=(0, 8))
+        battery = ttk.Combobox(
+            field,
+            textvariable=self.vars["sf_battery"],
+            values=generate_sf_international_template.BATTERY_OPTIONS,
+            state="readonly",
+            width=7,
+            font=("Microsoft YaHei UI", 9),
+        )
+        battery.grid(row=0, column=3, sticky="e")
+
+    def file_field(self, parent, row, label, key, filetypes):
+        field = tk.Frame(parent, bg=self.COLORS["soft"])
+        field.grid(row=row, column=0, sticky="ew", pady=3)
+        field.grid_columnconfigure(1, weight=1)
+        tk.Label(
+            field,
+            text=label,
+            bg=self.COLORS["soft"],
+            fg=self.COLORS["ink"],
+            font=("Microsoft YaHei UI", 9, "bold"),
+            width=25,
+            anchor="w",
+        ).grid(row=0, column=0, sticky="w", padx=(0, 8))
+        self.entry(field, self.vars[key]).grid(row=0, column=1, sticky="ew", padx=(0, 8))
+        self.secondary_button(field, "é€‰æ‹©", lambda: self.pick_file(key, filetypes), compact=True).grid(
+            row=0, column=2, sticky="e"
+        )
+
+    def card(self, parent, pad=12, bg=None):
+        color = bg or self.COLORS["surface"]
+        return tk.Frame(
+            parent,
+            bg=color,
+            padx=pad,
+            pady=pad,
+            highlightthickness=1,
+            highlightbackground=self.COLORS["line"],
+        )
+
+    def entry(self, parent, variable, width=None, state="normal"):
+        return tk.Entry(
+            parent,
+            textvariable=variable,
+            width=width,
+            state=state,
+            relief="flat",
+            bd=0,
+            highlightthickness=1,
+            highlightbackground="#cad7e6",
+            highlightcolor=self.COLORS["accent"],
+            bg="#ffffff",
+            fg=self.COLORS["ink"],
+            readonlybackground="#edf3f9",
+            font=("Microsoft YaHei UI", 9),
+        )
+
+    def primary_button(self, parent, text, command, inverted=False):
+        bg = "#ffffff" if inverted else self.COLORS["accent"]
+        fg = self.COLORS["accent_dark"] if inverted else "#ffffff"
+        active_bg = "#edf6ff" if inverted else self.COLORS["accent_dark"]
+        active_fg = self.COLORS["accent_dark"] if inverted else "#ffffff"
+        return tk.Button(
+            parent,
+            text=text,
+            command=command,
+            bg=bg,
+            fg=fg,
+            activebackground=active_bg,
+            activeforeground=active_fg,
+            relief="flat",
+            bd=0,
+            padx=18,
+            pady=8,
+            cursor="hand2",
+            font=("Microsoft YaHei UI", 10, "bold"),
+        )
+
+    def secondary_button(self, parent, text, command, compact=False):
+        return tk.Button(
+            parent,
+            text=text,
+            command=command,
+            bg=self.COLORS["button_soft"],
+            fg=self.COLORS["ink"],
+            activebackground="#dfeaf6",
+            activeforeground=self.COLORS["ink"],
+            relief="flat",
+            bd=0,
+            padx=8 if compact else 11,
+            pady=3 if compact else 6,
+            cursor="hand2",
+            font=("Microsoft YaHei UI", 9),
+        )
+
+    def info_dot(self, parent, text, bg=None, fg=None):
+        color = bg or self.COLORS["surface"]
+        outline = fg or "#74839a"
+        hover_fill = "#e4f1ff"
+        mark = tk.Canvas(
+            parent,
+            width=17,
+            height=17,
+            bg=color,
+            highlightthickness=0,
+            bd=0,
+            cursor="hand2",
+        )
+        circle = mark.create_oval(2, 2, 15, 15, outline=outline, width=1)
+        mark.create_text(8.5, 8.0, text="i", fill=outline, font=("Segoe UI", 8, "bold"))
+
+        def on_enter(_event=None):
+            mark.itemconfigure(circle, fill=hover_fill)
+
+        def on_leave(_event=None):
+            mark.itemconfigure(circle, fill=color)
+
+        mark.bind("<Enter>", on_enter, add="+")
+        mark.bind("<Leave>", on_leave, add="+")
+        Tooltip(mark, text)
+        return mark
+
+    def pick_file(self, key, filetypes):
+        path = filedialog.askopenfilename(filetypes=filetypes + [("æ‰€æœ‰æ–‡ä»¶", "*.*")])
+        if path:
+            self.vars[key].set(path)
+
+    def open_config_dialog(self):
+        dialog = tk.Toplevel(self.root)
+        dialog.title("å›ºå®šé…ç½®")
+        dialog.geometry("820x410")
+        dialog.minsize(760, 390)
+        dialog.configure(bg=self.COLORS["bg"])
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        panel = self.card(dialog, pad=16)
+        panel.pack(fill="both", expand=True, padx=16, pady=16)
+        panel.grid_columnconfigure(0, weight=1)
+
+        tk.Label(
+            panel,
+            text="å›ºå®šé…ç½®",
+            bg=self.COLORS["surface"],
+            fg=self.COLORS["ink"],
+            font=("Microsoft YaHei UI", 16, "bold"),
+        ).grid(row=0, column=0, sticky="w")
+        tk.Label(
+            panel,
+            text="è¿™äº›æ–‡ä»¶é€šå¸¸ä¸éœ€è¦æ¯å¤©ä¿®æ”¹ã€‚åªæœ‰ SKU å•†å“åº“æˆ–å¹³å°æ¨¡æ¿æ›´æ–°æ—¶ï¼Œæ‰éœ€è¦åœ¨è¿™é‡Œé‡æ–°é€‰æ‹©ã€‚",
+            bg=self.COLORS["surface"],
+            fg=self.COLORS["muted"],
+            font=("Microsoft YaHei UI", 9),
+            wraplength=760,
+            justify="left",
+        ).grid(row=1, column=0, sticky="w", pady=(5, 12))
+
+        for row, (label, key, filetypes) in enumerate(self.config_files, start=2):
+            self.config_file_field(panel, row, label, key, filetypes)
+
+        actions = tk.Frame(panel, bg=self.COLORS["surface"])
+        actions.grid(row=len(self.config_files) + 2, column=0, sticky="ew", pady=(14, 0))
+        actions.grid_columnconfigure(0, weight=1)
+        self.secondary_button(actions, "è‡ªåŠ¨è¯†åˆ«å›ºå®šé…ç½®", self.autofill_config).grid(row=0, column=0, sticky="w")
+        self.primary_button(actions, "ä¿å­˜å¹¶å…³é—­", dialog.destroy).grid(row=0, column=1, sticky="e")
+
+    def config_file_field(self, parent, row, label, key, filetypes):
+        field = tk.Frame(parent, bg=self.COLORS["surface"])
+        field.grid(row=row, column=0, sticky="ew", pady=6)
+        field.grid_columnconfigure(1, weight=1)
+        tk.Label(
+            field,
+            text=label,
+            bg=self.COLORS["surface"],
+            fg=self.COLORS["ink"],
+            font=("Microsoft YaHei UI", 9, "bold"),
+            width=16,
+            anchor="w",
+        ).grid(row=0, column=0, sticky="w", padx=(0, 8))
+        self.entry(field, self.vars[key]).grid(row=0, column=1, sticky="ew", padx=(0, 8))
+        self.secondary_button(field, "é€‰æ‹©", lambda: self.pick_file(key, filetypes), compact=True).grid(
+            row=0, column=2, sticky="e"
+        )
+
+    def refresh_output_dir(self):
+        try:
+            self.output_dir.set(str(date_folder(self.vars["date"].get())))
+            return True
+        except Exception:
+            messagebox.showerror("æ—¥æœŸæ ¼å¼é”™è¯¯", "è¯·ä½¿ç”¨ YYYY-MM-DDï¼Œä¾‹å¦‚ 2026-07-10")
+            return False
+
+    def autofill_latest(self):
+        self.vars["dp_orders"].set(latest_file(DEFAULT_DOWNLOADS, "Exported_Orders_*.csv"))
+        self.vars["yun_orders"].set(latest_file(DEFAULT_DOWNLOADS, "è®¢å•ä¿¡æ¯_*.xlsx"))
+        self.vars["sf_orders"].set(latest_file(DEFAULT_DOWNLOADS, "é¡ºä¸°è®¢å•æ•°æ®*.xls*"))
+        self.vars["label_zip"].set(latest_file(DEFAULT_DOWNLOADS, "è¿å•æ ‡ç­¾*.zip"))
+        self.vars["sf_label_pdf"].set(latest_file(DEFAULT_DOWNLOADS, "labelSF*.pdf"))
+        self.autofill_config(write_log=False)
+        self.write("å·²é‡æ–°è¯†åˆ«æœ¬æ¬¡æ‰¹æ¬¡æ–‡ä»¶ï¼Œå¹¶åŒæ­¥æ£€æŸ¥å›ºå®šé…ç½®ã€‚è¯·ç¡®è®¤è·¯å¾„æ˜¯å¦å¯¹åº”å½“å‰æ‰¹æ¬¡ã€‚")
+
+    def autofill_config(self, write_log=True):
+        self.vars["sku"].set(latest_file(DEFAULT_SKU_DIR, "*SKU*.xlsx"))
+        self.vars["yun_template"].set(latest_file(DEFAULT_TEMPLATE_DIR, "*CN0C021578*.xlsx"))
+        self.vars["sf_template"].set(
+            latest_file_across(
+                [
+                    (DEFAULT_DOWNLOADS, "BatchImportOrders_*.xlsm"),
+                    (DEFAULT_TEMPLATE_DIR, "BatchImportOrders_*.xlsm"),
+                ]
+            )
+        )
+        self.vars["dp_template"].set(latest_file(DEFAULT_TEMPLATE_DIR, "*Shipment_sample.xlsx"))
+        if write_log:
+            self.write("å·²é‡æ–°è¯†åˆ«å›ºå®šé…ç½®ã€‚SKU å•†å“åº“å’Œæ¨¡æ¿å¦‚æœæ²¡æœ‰æ›´æ–°ï¼Œå¹³æ—¶ä¸éœ€è¦æ”¹ã€‚")
+
+    def open_output_dir(self):
+        if not self.refresh_output_dir():
+            return
+        path = Path(self.output_dir.get())
+        path.mkdir(parents=True, exist_ok=True)
+        subprocess.Popen(["explorer", str(path)])
+
+    def open_last_result_dir(self):
+        if not self.last_result_dir or not self.last_result_dir.exists():
+            messagebox.showwarning("æš‚æ— ç»“æœ", "å½“å‰è¿˜æ²¡æœ‰å¯æ‰“å¼€çš„æˆåŠŸç»“æœæ–‡ä»¶å¤¹ã€‚")
+            return
+        subprocess.Popen(["explorer", str(self.last_result_dir)])
+
+    def extract_result_dir(self, output: str) -> Path | None:
+        matches = re.findall(r"^OK:\s*(.+?)\s*$", output, flags=re.MULTILINE)
+        if not matches:
+            return None
+        result_path = Path(matches[-1].strip().strip('"'))
+        if result_path.is_file():
+            return result_path.parent
+        if result_path.is_dir():
+            return result_path
+        return result_path.parent
+
+    def remember_result_dir(self, result_dir: Path | None):
+        self.last_result_dir = result_dir
+        self.update_result_buttons()
+        if result_dir:
+            self.status_text.set("æˆåŠŸï¼Œå¯æ‰“å¼€ç»“æœæ–‡ä»¶å¤¹")
+
+    def update_result_buttons(self):
+        enabled = bool(self.last_result_dir and self.last_result_dir.exists())
+        for button in self.result_buttons:
+            button.configure(state="normal" if enabled else "disabled")
+
+    def write(self, text):
+        if threading.current_thread() is threading.main_thread():
+            self._append_log(text)
+        else:
+            self.root.after(0, self._append_log, text)
+
+    def _append_log(self, text):
+        self.log.insert("end", text + "\n")
+        self.log.see("end")
+
+    def require_files(self, keys):
+        missing = [
+            self.FILE_LABELS.get(key, key)
+            for key in keys
+            if not self.vars[key].get() or not Path(self.vars[key].get()).exists()
+        ]
+        if missing:
+            messagebox.showerror(
+                "æ–‡ä»¶ç¼ºå¤±",
+                "è¿™äº›æ–‡ä»¶æ²¡æœ‰æ‰¾åˆ°ã€‚è‹¥æ˜¯å‰é¢æ­¥éª¤å·²é€‰æ‹©è¿‡ï¼Œè¯·ç‚¹å‡»é¡¶éƒ¨â€œè‡ªåŠ¨è¯†åˆ«â€æˆ–å›åˆ°å¯¹åº”æ­¥éª¤æ£€æŸ¥ï¼š\n"
+                + "\n".join(missing),
+            )
+            return False
+        return True
+
+    def set_running(self, running: bool):
+        self.running = running
+        if running:
+            self.status_text.set("å¤„ç†ä¸­ï¼Œè¯·ç­‰å¾…")
+        elif self.last_result_dir and self.last_result_dir.exists():
+            self.status_text.set("æˆåŠŸï¼Œå¯æ‰“å¼€ç»“æœæ–‡ä»¶å¤¹")
+        else:
+            self.status_text.set("å°±ç»ª")
+        for button in self.action_buttons:
+            button.configure(state="disabled" if running else "normal")
+        if running:
+            for button in self.result_buttons:
+                button.configure(state="disabled")
+        else:
+            self.update_result_buttons()
+
+    def run_script(self, script_name: str, args: list[str]) -> tuple[int, str, str]:
+        module = SCRIPT_MODULES[script_name]
+        old_argv = sys.argv[:]
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        try:
+            sys.argv = [script_name] + args
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                code = module.main()
+        finally:
+            sys.argv = old_argv
+        return int(code or 0), stdout.getvalue(), stderr.getvalue()
+
+    def run_cmd(self, title, cmd):
+        if self.running:
+            messagebox.showwarning("æ­£åœ¨å¤„ç†", "å½“å‰ä»»åŠ¡è¿˜æ²¡æœ‰ç»“æŸï¼Œè¯·ç­‰å¾…è¿è¡Œæ—¥å¿—æ˜¾ç¤ºç»“æœã€‚")
+            return
+        self.last_result_dir = None
+        self.update_result_buttons()
+        self.set_running(True)
+
+        def worker():
+            self.write("")
+            self.write(f"å¼€å§‹ï¼š{title}")
+            returncode, stdout, stderr = self.run_script(cmd[0], cmd[1:])
+            if stdout.strip():
+                self.write(stdout.strip())
+            if stderr.strip():
+                self.write(stderr.strip())
+            if returncode == 0:
+                self.write("ç»“æœï¼šæˆåŠŸ")
+                result_dir = self.extract_result_dir(stdout)
+                self.root.after(0, lambda: self.remember_result_dir(result_dir))
+                if result_dir:
+                    self.write(f"ç»“æœæ–‡ä»¶å¤¹ï¼š{result_dir}")
+            else:
+                self.write(f"ç»“æœï¼šå¤±è´¥ï¼Œé€€å‡ºç  {returncode}")
+            self.root.after(0, lambda: self.set_running(False))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def base_cmd(self, script):
+        if not self.refresh_output_dir():
+            raise ValueError("invalid date")
+        return [script, "--date", self.vars["date"].get(), "--output-root", self.output_dir.get()]
+
+    def run_sf(self):
+        if not self.require_files(["dp_orders", "sku", "sf_template"]):
+            return
+        business_type = self.vars["sf_business_type"].get()
+        if business_type not in generate_sf_international_template.SF_BUSINESS_TYPES:
+            messagebox.showerror("è¯·é€‰æ‹©ä¸šåŠ¡ç±»å‹", "è¯·å…ˆé€‰æ‹©æœ¬æ‰¹é¡ºä¸°å›½é™…è®¢å•ä½¿ç”¨çš„ä¸šåŠ¡ç±»å‹ã€‚")
+            return
+        self.run_cmd(
+            "ç¬¬1æ­¥ ç”Ÿæˆé¡ºä¸°å›½é™…ä¸Šä¼ æ¨¡æ¿",
+            self.base_cmd("generate_sf_international_template.py")
+            + [
+                "--dp-orders-csv",
+                self.vars["dp_orders"].get(),
+                "--sku-xlsx",
+                self.vars["sku"].get(),
+                "--sf-template-xlsm",
+                self.vars["sf_template"].get(),
+                "--business-type",
+                business_type,
+                "--battery",
+                self.vars["sf_battery"].get(),
+            ],
+        )
+
+    def run_yun(self):
+        if not self.require_files(["dp_orders", "sku", "yun_template"]):
+            return
+        self.run_cmd(
+            "ç¬¬1æ­¥ ç”Ÿæˆäº‘é€”ä¸Šä¼ æ¨¡æ¿",
+            self.base_cmd("generate_yunexpress_template.py")
+            + [
+                "--dp-orders-csv",
+                self.vars["dp_orders"].get(),
+                "--sku-xlsx",
+                self.vars["sku"].get(),
+                "--yunexpress-template-xlsx",
+                self.vars["yun_template"].get(),
+            ],
+        )
+
+    def run_dp(self):
+        platform = self.vars["shipping_platform"].get()
+        source_key = "sf_orders" if platform == "sf" else "yun_orders"
+        if not self.require_files([source_key, "dp_template"]):
+            return
+        dp_orders = Path(self.vars["dp_orders"].get())
+        if not dp_orders.is_file():
+            messagebox.showerror(
+                "ç¼ºå°‘æœ¬æ‰¹ DP è®¢å•",
+                "ä¸ºé˜²æ­¢å›å¡«é”™æ‰¹æ¬¡ï¼Œè¯·å…ˆå®Œæˆç¬¬1æ­¥ã€‚ç¬¬2æ­¥ä¼šè‡ªåŠ¨å¤ç”¨ç¬¬1æ­¥çš„ DP è®¢å• CSVï¼Œæ— éœ€å†æ¬¡é€‰æ‹©ã€‚",
+            )
+            return
+        source_args = (
+            ["--sf-international-file", self.vars["sf_orders"].get()]
+            if platform == "sf"
+            else ["--yunexpress-xlsx", self.vars["yun_orders"].get()]
+        )
+        title = "ç¬¬2æ­¥ ç”Ÿæˆé¡ºä¸° DP å›å¡«æ¨¡æ¿" if platform == "sf" else "ç¬¬2æ­¥ ç”Ÿæˆäº‘é€” DP å›å¡«æ¨¡æ¿"
+        self.run_cmd(
+            title,
+            self.base_cmd("generate_dp_shipment_upload.py")
+            + source_args
+            + [
+                "--dp-orders-csv",
+                str(dp_orders),
+                "--shipment-template-xlsx",
+                self.vars["dp_template"].get(),
+            ],
+        )
+
+    def run_labels(self):
+        if self.vars["shipping_platform"].get() == "sf":
+            if not self.require_files(["sf_label_pdf"]):
+                return
+            sf_orders = Path(self.vars["sf_orders"].get())
+            if not sf_orders.is_file():
+                messagebox.showerror(
+                    "ç¼ºå°‘æœ¬æ‰¹é¡ºä¸°è®¢å•",
+                    "ä¸ºé˜²æ­¢æ¼å•æˆ–æ··å…¥å…¶ä»–æ‰¹æ¬¡é¢å•ï¼Œè¯·å…ˆå®Œæˆç¬¬2æ­¥ã€‚ç¬¬3æ­¥ä¼šè‡ªåŠ¨å¤ç”¨é¡ºä¸°è®¢å•æ•°æ®ï¼Œæ— éœ€å†æ¬¡é€‰æ‹©ã€‚",
+                )
+                return
+            self.run_cmd(
+                "ç¬¬3æ­¥ æŒ‰å¯„æ–¹å§“åæ‹†åˆ†é¡ºä¸°é¢å•",
+                self.base_cmd("split_sf_labels_by_sender.py")
+                + [
+                    "--pdf",
+                    self.vars["sf_label_pdf"].get(),
+                    "--sf-international-file",
+                    str(sf_orders),
+                ],
+            )
+            return
+        if not self.require_files(["label_zip", "yun_orders", "dp_orders", "sku"]):
+            return
+        self.run_cmd(
+            "ç¬¬3æ­¥ æŒ‰ SKU åˆ†æ‹£é¢å•",
+            self.base_cmd("sort_yunexpress_labels_by_sku.py")
+            + [
+                "--zip",
+                self.vars["label_zip"].get(),
+                "--yunexpress-xlsx",
+                self.vars["yun_orders"].get(),
+                "--dp-orders-csv",
+                self.vars["dp_orders"].get(),
+                "--sku-xlsx",
+                self.vars["sku"].get(),
+            ],
+        )
+
+
+if __name__ == "__main__":
+    app_root = tk.Tk()
+    App(app_root)
+    app_root.mainloop()
