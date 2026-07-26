@@ -127,6 +127,7 @@ def read_yunexpress_shipments(xlsx_path: Path) -> dict[str, Shipment]:
         status_col = headers.get("订单状态")
         shipments: dict[str, Shipment] = {}
         duplicate_waybills: list[str] = []
+        order_ids: list[str] = []
 
         for row in range(2, sheet.max_row + 1):
             order_id = clean(sheet.cell(row, headers["客户单号"]).value)
@@ -145,9 +146,18 @@ def read_yunexpress_shipments(xlsx_path: Path) -> dict[str, Shipment]:
                 tracking=tracking,
                 status=shipment_status,
             )
+            order_ids.append(order_id)
 
         if duplicate_waybills:
             raise ValueError(f"Duplicate YunExpress waybills: {duplicate_waybills}")
+        duplicate_order_ids = sorted(
+            order_id for order_id, count in Counter(order_ids).items() if count > 1
+        )
+        if duplicate_order_ids:
+            raise ValueError(
+                "Duplicate YunExpress customer order IDs: "
+                + json.dumps(duplicate_order_ids, ensure_ascii=False)
+            )
         if not shipments:
             raise ValueError("No YunExpress shipment rows found.")
         return shipments
@@ -226,6 +236,13 @@ def validate(
 
     if missing_dp_orders:
         errors.append("YunExpress orders not found in DP order CSV: " + json.dumps(sorted(set(missing_dp_orders)), ensure_ascii=False))
+    shipment_order_ids = {shipment.order_id for shipment in shipments.values()}
+    missing_yunexpress_orders = sorted(set(order_to_sku) - shipment_order_ids)
+    if missing_yunexpress_orders:
+        errors.append(
+            "DP orders without YunExpress shipment: "
+            + json.dumps(missing_yunexpress_orders, ensure_ascii=False)
+        )
     if missing_sku_names:
         errors.append("SKUs missing declaration Chinese name: " + json.dumps(sorted(set(missing_sku_names)), ensure_ascii=False))
 

@@ -122,6 +122,21 @@ class WebPlatformTests(unittest.TestCase):
         self.assertIn("does not match DP CSV", response.text)
         self.assertEqual(previous.read_bytes(), b"previous-valid-batch")
 
+    def test_sf_step3_requires_the_step2_order_batch(self):
+        self.login()
+        batch = self.web.batch_dir(1, "sf")
+        shutil.rmtree(batch, ignore_errors=True)
+
+        response = self.client.post(
+            "/step/3",
+            data={"date": "2026-07-26", "platform": "sf"},
+            files={"file": ("labels.pdf", b"%PDF-placeholder", "application/pdf")},
+            follow_redirects=False,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("需要先在同一账号完成第 2 步", response.text)
+
     def test_platform_specific_config_requirements(self):
         self.assertEqual(
             self.web.required_config_keys(1, "sf"),

@@ -440,10 +440,10 @@ class App:
                 {
                     "nav": "顺丰面单PDF -> 寄方分组",
                     "title": "按寄方姓名拆分顺丰面单",
-                    "summary": "读取每页面单中的寄方姓名，生成每个供应商对应的合并 PDF。",
-                    "when": "顺丰国际合并面单 PDF 已下载后使用。",
+                    "summary": "读取每页面单中的寄方姓名，并与第2步运单逐单核对后生成供应商 PDF。",
+                    "when": "第2步已完成且顺丰国际合并面单 PDF 已下载后使用。",
                     "files": [("本次顺丰国际面单 PDF", "sf_label_pdf", [("PDF", "*.pdf")])],
-                    "config_note": "顺丰模式不需要 DP 订单、顺丰订单信息或 SKU 商品库。",
+                    "config_note": "自动沿用第2步顺丰订单数据做完整性校验；不需要再次选择，也不使用 SKU 商品库。",
                     "button": "按寄方姓名拆分",
                     "after": "每个寄方会得到一个合并 PDF；总目录保留分组汇总和校验报告。",
                     "command": self.run_labels,
@@ -470,17 +470,7 @@ class App:
 
     def select_step(self, index: int):
         self.current_step = index
-        for idx, button in enumerate(self.nav_buttons):
-            if idx == inde…1350 tokens truncated…["after"],
-            bg=self.COLORS["surface"],
-            fg=self.COLORS["muted"],
-        ).pack(side="left", padx=(6, 0))
-        start_button = self.primary_button(action, step["button"], step["command"])
-        start_button.grid(row=0, column=1, sticky="e", padx=(12, 0))
-        self.action_buttons.append(start_button)
-        result_button = self.secondary_button(action, "打开结果文件夹", self.open_last_result_dir, compact=True)
-        result_button.grid(row=0, column=2, sticky="e", padx=(8, 0))
-        self.result_buttons.append(result_button)
+        for…1505 tokens truncated…    self.result_buttons.append(result_button)
 
         self.set_running(self.running)
         self.update_result_buttons()
@@ -958,10 +948,22 @@ class App:
         if self.vars["shipping_platform"].get() == "sf":
             if not self.require_files(["sf_label_pdf"]):
                 return
+            sf_orders = Path(self.vars["sf_orders"].get())
+            if not sf_orders.is_file():
+                messagebox.showerror(
+                    "缺少本批顺丰订单",
+                    "为防止漏单或混入其他批次面单，请先完成第2步。第3步会自动复用顺丰订单数据，无需再次选择。",
+                )
+                return
             self.run_cmd(
                 "第3步 按寄方姓名拆分顺丰面单",
                 self.base_cmd("split_sf_labels_by_sender.py")
-                + ["--pdf", self.vars["sf_label_pdf"].get()],
+                + [
+                    "--pdf",
+                    self.vars["sf_label_pdf"].get(),
+                    "--sf-international-file",
+                    str(sf_orders),
+                ],
             )
             return
         if not self.require_files(["label_zip", "yun_orders", "dp_orders", "sku"]):

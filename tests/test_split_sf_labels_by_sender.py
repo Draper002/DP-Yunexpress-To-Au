@@ -38,6 +38,29 @@ class SplitSfLabelsBySenderTests(unittest.TestCase):
     def test_sanitizes_windows_filename_characters(self):
         self.assertEqual(splitter.safe_filename(' 供应商:A/B*? '), "供应商_A_B__")
 
+    def test_rejects_label_waybill_set_mismatch(self):
+        labels = [
+            {"waybill": "SF6047737000001"},
+            {"waybill": "SF6047737000002"},
+        ]
+
+        with self.assertRaisesRegex(ValueError, "does not match SF order file"):
+            splitter.validate_expected_waybills(
+                labels,
+                ["SF6047737000001", "SF6047737000003"],
+            )
+
+    def test_accepts_exact_label_waybill_set(self):
+        labels = [
+            {"waybill": "SF6047737000001"},
+            {"waybill": "SF6047737000002"},
+        ]
+
+        splitter.validate_expected_waybills(
+            labels,
+            ["sf6047737000002", "SF6047737000001"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -35,6 +35,26 @@ class SortYunexpressLabelsTests(unittest.TestCase):
 
         self.assertEqual(mapping, {"CURRENT-001": "SKU-NEW"})
 
+    def test_validation_rejects_dp_order_without_yunexpress_shipment(self):
+        labels = [sorter.LabelPdf(zip_name="YT0001.pdf", waybill="YT0001")]
+        shipments = {
+            "YT0001": sorter.Shipment(
+                order_id="ORDER-001",
+                waybill="YT0001",
+                tracking="",
+                status="",
+            )
+        }
+
+        errors = sorter.validate(
+            labels,
+            shipments,
+            {"ORDER-001": "SKU-001", "ORDER-002": "SKU-002"},
+            {"SKU-001": "商品一", "SKU-002": "商品二"},
+        )
+
+        self.assertTrue(any("DP orders without YunExpress shipment" in error for error in errors))
+
 
 if __name__ == "__main__":
     unittest.main()

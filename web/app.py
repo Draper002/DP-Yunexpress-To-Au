@@ -342,7 +342,7 @@ def home(request: Request):
     <section class="steps">
       <article data-platform="yunexpress"><div class="step-head"><div class="no">01</div><span>寄件导入</span></div><h2><span class="yun-only">生成云途模板</span><span class="sf-only">生成顺丰模板</span></h2><p><span class="yun-only">DP 订单转换为云途批量寄件 Excel。</span><span class="sf-only">DP 订单转换为顺丰国际批量导入工作簿。</span></p><form class="workflow-form" data-platform="yunexpress" action="/step/1" method="post" enctype="multipart/form-data">{platform_selector()}{field("file","本次 DP 订单 CSV",".csv")}{sf_options()}<div class="row"><input name="date" type="date" value="{today}" required><button class="primary" type="submit">开始生成</button></div></form></article>
       <article data-platform="yunexpress"><div class="step-head"><div class="no">02</div><span>DP 回填</span></div><h2>生成 DP 回填模板</h2><p><span class="yun-only">上传云途订单信息 Excel，批量回填运单号。</span><span class="sf-only">上传顺丰订单数据，承运商自动填写 SF INTERNATIONAL。</span></p><form class="workflow-form" data-platform="yunexpress" action="/step/2" method="post" enctype="multipart/form-data">{platform_selector()}<label class="file"><b><span class="yun-only">本次云途订单信息 Excel</span><span class="sf-only">本次顺丰国际订单数据</span></b><input name="file" type="file" accept=".xls,.xlsx" required><span>选择文件</span></label><div class="row"><input name="date" type="date" value="{today}" required><button class="primary" type="submit">开始生成</button></div></form></article>
-      <article data-platform="yunexpress"><div class="step-head"><div class="no">03</div><span>面单整理</span></div><h2><span class="yun-only">按 SKU 分拣</span><span class="sf-only">按寄方姓名拆分</span></h2><p><span class="yun-only">上传云途面单 ZIP，生成按 SKU 分组的供应商包。</span><span class="sf-only">上传顺丰面单 PDF，生成每个寄方姓名对应的 PDF。</span></p><form class="workflow-form" data-platform="yunexpress" action="/step/3" method="post" enctype="multipart/form-data">{platform_selector()}<label class="file"><b><span class="yun-only">本次云途面单 ZIP</span><span class="sf-only">本次顺丰国际面单 PDF</span></b><input name="file" type="file" accept=".zip,.pdf" required><span>选择文件</span></label><div class="row"><input name="date" type="date" value="{today}" required><button class="primary" type="submit">开始整理</button></div></form></article>
+      <article data-platform="yunexpress"><div class="step-head"><div class="no">03</div><span>面单整理</span></div><h2><span class="yun-only">按 SKU 分拣</span><span class="sf-only">按寄方姓名拆分</span></h2><p><span class="yun-only">上传云途面单 ZIP，生成按 SKU 分组的供应商包。</span><span class="sf-only">上传顺丰面单 PDF，自动核对第 2 步运单后按寄方拆分。</span></p><form class="workflow-form" data-platform="yunexpress" action="/step/3" method="post" enctype="multipart/form-data">{platform_selector()}<label class="file"><b><span class="yun-only">本次云途面单 ZIP</span><span class="sf-only">本次顺丰国际面单 PDF</span></b><input name="file" type="file" accept=".zip,.pdf" required><span>选择文件</span></label><div class="row"><input name="date" type="date" value="{today}" required><button class="primary" type="submit">开始整理</button></div></form></article>
     </section><section class="history"><div class="section-head"><div><p class="eyebrow">ACTIVITY</p><h2>我的最近处理记录</h2></div><span>每个账号仅显示自己的批次</span></div><div class="table-wrap"><table><thead><tr><th>时间</th><th>步骤</th><th>状态</th><th>日期</th><th>结果</th></tr></thead><tbody>{records}</tbody></table></div></section>'''
     return HTMLResponse(page("工作台", content, user))
 
@@ -371,8 +371,7 @@ async def save_config(
     sku: UploadFile | None = File(None),
     yun_template: UploadFile | None = File(None),
     sf_template: UploadFile | None = File(None),
-    dp_template: UploadFile | None …123 tokens truncated…文件", '<section class="login"><h1>没有选择配置文件</h1><p class="lead">请选择至少一个需要更新的文件。</p><a class="button" href="/config">返回固定配置</a></section>', user), status_code=400)
-    allowed = {"sf_template": {".xlsm"}}
+    dp_template: UploadFile…189 tokens truncated…{".xlsm"}}
     staging = CONFIG / f".staging-{secrets.token_hex(8)}"
     staged: dict[str, Path] = {}
     try:
@@ -502,10 +501,14 @@ def execute_workflow(
             ],
         )
     else:
+        sf_order_files = list(batch.glob("sf_orders.xls*"))
+        if len(sf_order_files) != 1:
+            raise ValueError("顺丰面单拆分需要先在同一账号完成第 2 步")
         code, out, err = script(
             split_sf_labels_by_sender,
             [
                 "--pdf", str(source),
+                "--sf-international-file", str(sf_order_files[0]),
                 "--date", date,
                 "--output-root", str(output),
             ],

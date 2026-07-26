@@ -33,7 +33,7 @@ docs/                   总体需求和开发进度文档
 |---|---|---|
 | 1 | DP CSV -> 云途批量寄件 Excel | DP CSV -> 顺丰批量导入 XLSM |
 | 2 | 云途订单信息 -> DP 回填模板 | 顺丰订单 `.xls/.xlsx` -> DP 回填模板，承运商为 `SF INTERNATIONAL` |
-| 3 | 面单 ZIP -> 按 SKU 的供应商文件夹与 ZIP | 合并面单 PDF -> 按寄方姓名拆分的 PDF |
+| 3 | 面单 ZIP -> 按 SKU 的供应商文件夹与 ZIP | 合并面单 PDF 与第 2 步运单逐单核对后，按寄方姓名拆分 PDF |
 
 ## 文档入口
 

@@ -14,6 +14,8 @@ from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
 
+from generate_dp_shipment_upload import read_sf_international_rows
+
 
 SENDER_PATTERN = re.compile(r"寄方姓名\s*[:：]\s*([^\r\n]+)")
 WAYBILL_PATTERN = re.compile(r"\bSF\d{10,20}\b", re.IGNORECASE)
@@ -91,15 +93,50 @@ def inspect_labels(reader: PdfReader) -> list[dict[str, object]]:
     return labels
 
 
+def validate_expected_waybills(
+    labels: list[dict[str, object]],
+    expected_waybills: list[str],
+) -> None:
+    normalized_expected = [value.strip().upper() for value in expected_waybills if value.strip()]
+    duplicate_expected = sorted(
+        value for value, count in Counter(normalized_expected).items() if count > 1
+    )
+    if duplicate_expected:
+        raise ValueError(
+            "Duplicate SF waybills in order file: "
+            + json.dumps(duplicate_expected, ensure_ascii=False)
+        )
+    label_waybills = {str(label["waybill"]).upper() for label in labels}
+    expected_set = set(normalized_expected)
+    if label_waybills != expected_set:
+        raise ValueError(
+            "SF label waybill set does not match SF order file. "
+            + json.dumps(
+                {
+                    "missing_labels": sorted(expected_set - label_waybills),
+                    "extra_labels": sorted(label_waybills - expected_set),
+                },
+                ensure_ascii=False,
+            )
+        )
+
+
 def split_labels(
     source_pdf: Path,
     ship_date: str,
     output_root: Path,
+    sf_order_file: Path | None = None,
 ) -> tuple[Path, dict[str, object]]:
     reader = PdfReader(source_pdf)
     if reader.is_encrypted:
         raise ValueError("Encrypted SF label PDFs are not supported.")
     labels = inspect_labels(reader)
+    expected_waybill_count = None
+    if sf_order_file:
+        shipment_rows = read_sf_international_rows(sf_order_file)
+        expected_waybills = [row["Tracking Number"] for row in shipment_rows]
+        validate_expected_waybills(labels, expected_waybills)
+        expected_waybill_count = len(expected_waybills)
 
     groups: dict[str, list[dict[str, object]]] = {}
     for label in labels:
@@ -167,7 +204,9 @@ def split_labels(
     report = {
         "status": "OK",
         "source_pdf": str(source_pdf),
+        "sf_order_file": str(sf_order_file) if sf_order_file else None,
         "source_page_count": len(labels),
+        "expected_waybill_count": expected_waybill_count,
         "unique_waybill_count": len({str(label["waybill"]) for label in labels}),
         "sender_group_count": len(group_reports),
         "output_page_count": output_page_count,
@@ -183,13 +222,19 @@ def split_labels(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Split SF International labels by sender name.")
     parser.add_argument("--pdf", required=True, type=Path)
+    parser.add_argument("--sf-international-file", type=Path, default=None)
     parser.add_argument("--date", required=True)
     parser.add_argument("--output-root", type=Path, default=None)
     args = parser.parse_args()
 
     try:
         output_root = args.output_root or default_output_root(args.date)
-        batch_dir, _report = split_labels(args.pdf, args.date, output_root)
+        batch_dir, _report = split_labels(
+            args.pdf,
+            args.date,
+            output_root,
+            args.sf_international_file,
+        )
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
