@@ -135,30 +135,33 @@ def read_dp_orders(csv_path: Path, status: str) -> tuple[list[dict[str, str]], d
 
 def read_sku_info(xlsx_path: Path) -> dict[str, dict[str, object]]:
     workbook = openpyxl.load_workbook(xlsx_path, data_only=True)
-    sheet = workbook.worksheets[0]
-    headers = header_columns(sheet)
+    try:
+        sheet = workbook.worksheets[0]
+        headers = header_columns(sheet)
 
-    zh_col = headers.get("申报中文名", 2)
-    en_col = headers.get("申报英文名", 3)
-    sku_col = headers.get("SKU", 4)
-    price_col = headers.get("单价", 5)
-    weight_col = headers.get("单重", 6)
+        zh_col = headers.get("申报中文名", 2)
+        en_col = headers.get("申报英文名", 3)
+        sku_col = headers.get("SKU", 4)
+        price_col = headers.get("单价", 5)
+        weight_col = headers.get("单重", 6)
 
-    sku_map: dict[str, dict[str, object]] = {}
-    for row in range(2, sheet.max_row + 1):
-        sku = clean(sheet.cell(row, sku_col).value)
-        if not sku:
-            continue
-        candidate = {
-            "chinese_name": clean(sheet.cell(row, zh_col).value),
-            "english_name": clean(sheet.cell(row, en_col).value),
-            "price_usd": parse_number(sheet.cell(row, price_col).value),
-            "unit_weight_kg": parse_number(sheet.cell(row, weight_col).value),
-        }
-        current = sku_map.get(sku)
-        if current is None or sku_info_score(candidate) > sku_info_score(current):
-            sku_map[sku] = candidate
-    return sku_map
+        sku_map: dict[str, dict[str, object]] = {}
+        for row in range(2, sheet.max_row + 1):
+            sku = clean(sheet.cell(row, sku_col).value)
+            if not sku:
+                continue
+            candidate = {
+                "chinese_name": clean(sheet.cell(row, zh_col).value),
+                "english_name": clean(sheet.cell(row, en_col).value),
+                "price_usd": parse_number(sheet.cell(row, price_col).value),
+                "unit_weight_kg": parse_number(sheet.cell(row, weight_col).value),
+            }
+            current = sku_map.get(sku)
+            if current is None or sku_info_score(candidate) > sku_info_score(current):
+                sku_map[sku] = candidate
+        return sku_map
+    finally:
+        workbook.close()
 
 
 def set_value(row_values: list[object], header_to_index: dict[str, int], header: str, value: object) -> None:
@@ -223,35 +226,45 @@ def build_yunexpress_rows(
 
 def write_template(template_path: Path, rows: list[list[object]], date: str, product_code: str, output_root: Path) -> Path:
     workbook = openpyxl.load_workbook(template_path)
-    sheet = workbook.worksheets[0]
-    headers = [clean(sheet.cell(1, col).value) for col in range(1, sheet.max_column + 1)]
-    if sheet.max_row > 1:
-        sheet.delete_rows(2, sheet.max_row - 1)
+    try:
+        sheet = workbook.worksheets[0]
+        if sheet.max_row > 1:
+            sheet.delete_rows(2, sheet.max_row - 1)
 
-    for row_idx, row_values in enumerate(rows, start=2):
-        for col_idx, value in enumerate(row_values, start=1):
-            sheet.cell(row_idx, col_idx).value = value
+        for row_idx, row_values in enumerate(rows, start=2):
+            for col_idx, value in enumerate(row_values, start=1):
+                sheet.cell(row_idx, col_idx).value = value
 
-    output_dir = output_root / "云途上传模板"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = unique_path(output_dir / f"云途批量寄件_{date}_{len(rows)}orders_{product_code}.xlsx")
-    workbook.save(output_path)
+        output_dir = output_root / "云途上传模板"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = unique_path(output_dir / f"云途批量寄件_{date}_{len(rows)}orders_{product_code}.xlsx")
+        workbook.save(output_path)
+    finally:
+        workbook.close()
     return output_path
 
 
 def validate_output(path: Path) -> dict[str, object]:
     workbook = openpyxl.load_workbook(path, data_only=True)
-    sheet = workbook.worksheets[0]
-    rows = [row for row in range(2, sheet.max_row + 1) if clean(sheet.cell(row, 1).value)]
-    required_cols = [1, 2, 14, 15, 18, 19, 20, 21, 22, 27, 47, 48, 50, 51, 53]
-    missing = [(row, col) for row in rows for col in required_cols if sheet.cell(row, col).value in (None, "")]
-    return {
-        "row_count": len(rows),
-        "required_missing_count": len(missing),
-        "product_codes": dict(Counter(clean(sheet.cell(row, 2).value) for row in rows)),
-        "countries": dict(Counter(clean(sheet.cell(row, 14).value) for row in rows)),
-        "sku_counts": dict(Counter(clean(sheet.cell(row, 47).value) for row in rows)),
-    }
+    try:
+        sheet = workbook.worksheets[0]
+        rows = [row for row in range(2, sheet.max_row + 1) if clean(sheet.cell(row, 1).value)]
+        required_cols = [1, 2, 14, 15, 18, 19, 20, 21, 22, 27, 47, 48, 50, 51, 53]
+        missing = [
+            (row, col)
+            for row in rows
+            for col in required_cols
+            if sheet.cell(row, col).value in (None, "")
+        ]
+        return {
+            "row_count": len(rows),
+            "required_missing_count": len(missing),
+            "product_codes": dict(Counter(clean(sheet.cell(row, 2).value) for row in rows)),
+            "countries": dict(Counter(clean(sheet.cell(row, 14).value) for row in rows)),
+            "sku_counts": dict(Counter(clean(sheet.cell(row, 47).value) for row in rows)),
+        }
+    finally:
+        workbook.close()
 
 
 def main() -> int:
@@ -270,9 +283,14 @@ def main() -> int:
         orders, source_counts = read_dp_orders(args.dp_orders_csv, args.status)
         sku_map = read_sku_info(args.sku_xlsx)
         template_wb = openpyxl.load_workbook(args.yunexpress_template_xlsx, read_only=True)
-        template_sheet = template_wb.worksheets[0]
-        template_headers = [clean(template_sheet.cell(1, col).value) for col in range(1, template_sheet.max_column + 1)]
-        template_wb.close()
+        try:
+            template_sheet = template_wb.worksheets[0]
+            template_headers = [
+                clean(template_sheet.cell(1, col).value)
+                for col in range(1, template_sheet.max_column + 1)
+            ]
+        finally:
+            template_wb.close()
         output_rows = build_yunexpress_rows(orders, sku_map, template_headers, args.product_code)
         output_path = write_template(args.yunexpress_template_xlsx, output_rows, args.date, args.product_code, output_root)
         validation = validate_output(output_path)
@@ -296,4 +314,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

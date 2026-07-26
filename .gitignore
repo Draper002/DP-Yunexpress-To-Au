@@ -21,8 +21,12 @@ outputs/
 *.xls
 *.xlsm
 *.pdf
+web/data/
+*.sqlite3
 
 # Machine-local configuration.
 config.json
 *.local.json
-
+.env
+*.log
+.codex_tmp_compare/

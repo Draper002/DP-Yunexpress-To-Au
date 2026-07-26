@@ -1,16 +1,24 @@
 # -*- mode: python ; coding: utf-8 -*-
+from pathlib import Path
+
 from PyInstaller.utils.hooks import collect_all
 
+spec_dir = Path(SPECPATH).resolve()
+project_root = spec_dir.parents[1]
 datas = []
 binaries = []
 hiddenimports = []
 tmp_ret = collect_all('openpyxl')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('xlrd')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('pypdf')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 
 a = Analysis(
-    ['app.py'],
-    pathex=[],
+    [str(spec_dir / 'app.py')],
+    pathex=[str(project_root), str(project_root / 'shared' / 'fulfillment')],
     binaries=binaries,
     datas=datas,
     hiddenimports=hiddenimports,
@@ -43,4 +51,3 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
-
