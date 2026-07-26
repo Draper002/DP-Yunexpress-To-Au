@@ -1,3 +1,4 @@
+import csv
 import sys
 import tempfile
 import unittest
@@ -13,6 +14,31 @@ import generate_dp_shipment_upload as shipment
 
 
 class DpShipmentUploadTests(unittest.TestCase):
+    def test_dp_order_validation_uses_only_processing_rows(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "orders.csv"
+            with path.open("w", encoding="utf-8-sig", newline="") as stream:
+                writer = csv.DictWriter(stream, fieldnames=["Order ID", "Status"])
+                writer.writeheader()
+                writer.writerow({"Order ID": "CURRENT-001", "Status": "processing"})
+                writer.writerow({"Order ID": "OLD-001", "Status": "shipped"})
+
+            order_ids = shipment.read_dp_order_ids(path)
+
+        self.assertEqual(order_ids, {"CURRENT-001"})
+
+    def test_dp_order_validation_rejects_duplicate_processing_ids(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "orders.csv"
+            with path.open("w", encoding="utf-8-sig", newline="") as stream:
+                writer = csv.DictWriter(stream, fieldnames=["Order ID", "Status"])
+                writer.writeheader()
+                writer.writerow({"Order ID": "DUPLICATE-001", "Status": "processing"})
+                writer.writerow({"Order ID": "DUPLICATE-001", "Status": "processing"})
+
+            with self.assertRaisesRegex(ValueError, "Duplicate Order ID"):
+                shipment.read_dp_order_ids(path)
+
     def test_reads_sf_xlsx_with_dp_order_and_sf_waybill(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "sf-orders.xlsx"

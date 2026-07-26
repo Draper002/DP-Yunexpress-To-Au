@@ -1,6 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
+from pathlib import Path
+
 from PyInstaller.utils.hooks import collect_all
 
+spec_dir = Path(SPECPATH).resolve()
+project_root = spec_dir.parents[1]
 datas = []
 binaries = []
 hiddenimports = []
@@ -13,8 +17,8 @@ datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 
 a = Analysis(
-    ['app.py'],
-    pathex=['C:\\Users\\Admin\\Desktop\\Codex Folder\\DropShipZone\\shared\\fulfillment'],
+    [str(spec_dir / 'app.py')],
+    pathex=[str(project_root), str(project_root / 'shared' / 'fulfillment')],
     binaries=binaries,
     datas=datas,
     hiddenimports=hiddenimports,

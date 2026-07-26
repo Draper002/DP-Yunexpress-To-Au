@@ -22,6 +22,7 @@ except ImportError:  # pragma: no cover - exercised only in an incomplete runtim
 
 YUNEXPRESS_CARRIER = "YunExpress"
 SF_INTERNATIONAL_CARRIER = "SF INTERNATIONAL"
+DEFAULT_DP_STATUS = "processing"
 
 
 def clean(value: object) -> str:
@@ -53,15 +54,30 @@ def unique_path(path: Path) -> Path:
     return path.with_name(f"{path.stem}_{stamp}{path.suffix}")
 
 
-def read_dp_order_ids(csv_path: Path) -> set[str]:
+def read_dp_order_ids(csv_path: Path, status: str = DEFAULT_DP_STATUS) -> set[str]:
     with csv_path.open("r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
-        if "Order ID" not in (reader.fieldnames or []):
+        fieldnames = [clean(header) for header in (reader.fieldnames or [])]
+        reader.fieldnames = fieldnames
+        if "Order ID" not in fieldnames:
             raise ValueError("DP order CSV missing Order ID column.")
-        order_ids = {clean(row.get("Order ID")) for row in reader if clean(row.get("Order ID"))}
+        rows = [dict(row) for row in reader]
+
+    if "Status" in fieldnames:
+        rows = [row for row in rows if clean(row.get("Status")) == status]
+    order_ids = [clean(row.get("Order ID")) for row in rows if clean(row.get("Order ID"))]
     if not order_ids:
-        raise ValueError("DP order CSV contains no Order ID values.")
-    return order_ids
+        suffix = f" with Status={status!r}" if "Status" in fieldnames else ""
+        raise ValueError(f"DP order CSV contains no Order ID values{suffix}.")
+    duplicate_order_ids = sorted(
+        order_id for order_id, count in Counter(order_ids).items() if count > 1
+    )
+    if duplicate_order_ids:
+        raise ValueError(
+            "Duplicate Order ID in selected DP rows: "
+            + json.dumps(duplicate_order_ids, ensure_ascii=False)
+        )
+    return set(order_ids)
 
 
 def read_yunexpress_rows(xlsx_path: Path, prefer_tracking: bool) -> list[dict[str, str]]:
@@ -198,45 +214,56 @@ def write_upload(
     carrier: str,
 ) -> Path:
     workbook = openpyxl.load_workbook(template_path)
-    sheet = workbook.worksheets[0]
-    if sheet.max_row > 1:
-        sheet.delete_rows(2, sheet.max_row - 1)
-    headers = ["Order ID", "Carrier", "Tracking Number"]
-    for col_idx, header in enumerate(headers, start=1):
-        sheet.cell(1, col_idx).value = header
-    for column, width in {"A": 18, "B": 22, "C": 24}.items():
-        sheet.column_dimensions[column].width = max(sheet.column_dimensions[column].width or 0, width)
-    for row_idx, row in enumerate(rows, start=2):
+    try:
+        sheet = workbook.worksheets[0]
+        if sheet.max_row > 1:
+            sheet.delete_rows(2, sheet.max_row - 1)
+        headers = ["Order ID", "Carrier", "Tracking Number"]
         for col_idx, header in enumerate(headers, start=1):
-            cell = sheet.cell(row_idx, col_idx)
-            cell.value = row[header]
-            cell.number_format = "@"
+            sheet.cell(1, col_idx).value = header
+        for column, width in {"A": 18, "B": 22, "C": 24}.items():
+            sheet.column_dimensions[column].width = max(sheet.column_dimensions[column].width or 0, width)
+        for row_idx, row in enumerate(rows, start=2):
+            for col_idx, header in enumerate(headers, start=1):
+                cell = sheet.cell(row_idx, col_idx)
+                cell.value = row[header]
+                cell.number_format = "@"
 
-    output_dir = output_root / "DP回填模板"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    carrier_label = "YunExpress" if carrier == YUNEXPRESS_CARRIER else "SF-INTERNATIONAL"
-    output_path = unique_path(output_dir / f"DP_发货回填_{date}_{len(rows)}orders_{carrier_label}_waybill.xlsx")
-    workbook.save(output_path)
+        output_dir = output_root / "DP回填模板"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        carrier_label = "YunExpress" if carrier == YUNEXPRESS_CARRIER else "SF-INTERNATIONAL"
+        output_path = unique_path(output_dir / f"DP_发货回填_{date}_{len(rows)}orders_{carrier_label}_waybill.xlsx")
+        workbook.save(output_path)
+    finally:
+        workbook.close()
     return output_path
 
 
 def validate_output(path: Path) -> dict[str, object]:
     workbook = openpyxl.load_workbook(path, data_only=True)
-    sheet = workbook.worksheets[0]
-    headers = [sheet.cell(1, col).value for col in range(1, 4)]
-    rows = [
-        [sheet.cell(row, col).value for col in range(1, 4)]
-        for row in range(2, sheet.max_row + 1)
-        if any(sheet.cell(row, col).value not in (None, "") for col in range(1, 4))
-    ]
-    blank_cells = [(idx + 2, col + 1) for idx, row in enumerate(rows) for col, value in enumerate(row) if value in (None, "")]
-    return {
-        "headers_ok": headers == ["Order ID", "Carrier", "Tracking Number"],
-        "row_count": len(rows),
-        "blank_cells_count": len(blank_cells),
-        "carrier_counts": dict(Counter(row[1] for row in rows)),
-        "tracking_unique_count": len({row[2] for row in rows}),
-    }
+    try:
+        sheet = workbook.worksheets[0]
+        headers = [sheet.cell(1, col).value for col in range(1, 4)]
+        rows = [
+            [sheet.cell(row, col).value for col in range(1, 4)]
+            for row in range(2, sheet.max_row + 1)
+            if any(sheet.cell(row, col).value not in (None, "") for col in range(1, 4))
+        ]
+        blank_cells = [
+            (idx + 2, col + 1)
+            for idx, row in enumerate(rows)
+            for col, value in enumerate(row)
+            if value in (None, "")
+        ]
+        return {
+            "headers_ok": headers == ["Order ID", "Carrier", "Tracking Number"],
+            "row_count": len(rows),
+            "blank_cells_count": len(blank_cells),
+            "carrier_counts": dict(Counter(row[1] for row in rows)),
+            "tracking_unique_count": len({row[2] for row in rows}),
+        }
+    finally:
+        workbook.close()
 
 
 def main() -> int:

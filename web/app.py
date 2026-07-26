@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import hmac
 import html
@@ -15,8 +16,10 @@ from contextlib import asynccontextmanager, closing, redirect_stderr, redirect_s
 from datetime import datetime
 from pathlib import Path
 
+import openpyxl
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from starlette.concurrency import run_in_threadpool
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOL_ROOT = ROOT / "shared" / "fulfillment"
@@ -51,6 +54,27 @@ CONFIG_LABELS = {
 }
 PLATFORM_LABELS = {"yunexpress": "云途", "sf": "顺丰国际"}
 SCRIPT_LOCK = threading.Lock()
+WORKFLOW_LOCK = asyncio.Lock()
+YUN_TEMPLATE_HEADERS = {
+    "客户订单号",
+    "产品代码",
+    "收件人国家",
+    "收件人姓名",
+    "收件人地址",
+    "收件人城市",
+    "收件人省州",
+    "邮编",
+    "电话",
+    "件数",
+    "包裹总重量",
+    "申报币种",
+    "SKU1",
+    "申报品名1",
+    "中文申报品名1",
+    "申报数量1",
+    "申报FOB价1",
+    "申报单重1",
+}
 
 
 @asynccontextmanager
@@ -98,6 +122,7 @@ def init_db():
         """)
         if not conn.execute("SELECT 1 FROM users LIMIT 1").fetchone():
             conn.execute("INSERT INTO users(email,password_hash,role,created_at) VALUES(?,?,?,?)", (ADMIN_EMAIL, hash_password(ADMIN_PASSWORD), "admin", datetime.now().isoformat(timespec="seconds")))
+        conn.execute("DELETE FROM sessions WHERE expires_at<=?", (int(time.time()),))
         conn.commit()
 
 
@@ -130,6 +155,42 @@ def config_path(key: str) -> Path:
     if key not in CONFIG_FILES:
         raise KeyError(f"Unknown config key: {key}")
     return CONFIG / CONFIG_FILES[key]
+
+
+def validate_config_upload(key: str, path: Path) -> None:
+    if key == "sku":
+        if not generate_yunexpress_template.read_sku_info(path):
+            raise ValueError("SKU 商品库没有可用的 SKU 数据")
+        return
+
+    workbook = openpyxl.load_workbook(
+        path,
+        read_only=True,
+        data_only=False,
+        keep_vba=key == "sf_template",
+    )
+    try:
+        if not workbook.worksheets:
+            raise ValueError(f"{CONFIG_LABELS[key]}没有工作表")
+        sheet = (
+            workbook["标准上传格式"]
+            if key == "sf_template" and "标准上传格式" in workbook.sheetnames
+            else workbook.worksheets[0]
+        )
+        headers = {
+            generate_yunexpress_template.clean(sheet.cell(1, column).value)
+            for column in range(1, sheet.max_column + 1)
+        }
+        if key == "yun_template":
+            missing = sorted(YUN_TEMPLATE_HEADERS - headers)
+            if missing:
+                raise ValueError("云途标准模板缺少字段：" + "、".join(missing))
+        elif key == "sf_template":
+            missing = sorted(set(generate_sf_international_template.HEADER.values()) - headers)
+            if missing:
+                raise ValueError("顺丰国际标准模板缺少字段：" + "、".join(missing))
+    finally:
+        workbook.close()
 
 
 def normalize_platform(value: str) -> str:
@@ -233,7 +294,7 @@ def page(title: str, content: str, user=None) -> str:
 def login_page(request: Request):
     if user_for(request):
         return RedirectResponse("/", status_code=303)
-    return HTMLResponse(page("登录", '<section class="login"><div class="mark">DP<span>&</span></div><p class="eyebrow">PRIVATE OPERATIONS</p><h1>登录发货工作台</h1><p class="lead">员工账号由管理员创建，订单文件只在本次批次期间临时保存。</p><form method="post" action="/login"><label>邮箱<input name="email" type="email" required></label><label>密码<input name="password" type="password" required></label><button class="primary" type="submit">登录</button></form></section>'))
+    return HTMLResponse(page("登录", '<section class="login"><div class="mark">DP<span>&</span></div><p class="eyebrow">PRIVATE OPERATIONS</p><h1>登录发货工作台</h1><p class="lead">员工账号由管理员创建，订单文件和处理记录按账号隔离保存。</p><form method="post" action="/login"><label>邮箱<input name="email" type="email" required></label><label>密码<input name="password" type="password" required></label><button class="primary" type="submit">登录</button></form></section>'))
 
 
 @app.post("/login")
@@ -310,26 +371,31 @@ async def save_config(
     sku: UploadFile | None = File(None),
     yun_template: UploadFile | None = File(None),
     sf_template: UploadFile | None = File(None),
-    dp_template: UploadFile | None = File(None),
-):
-    user = user_for(request)
-    if not user or user["role"] != "admin": return HTMLResponse("无权限", status_code=403)
-    selected = [
-        (key, upload)
-        for key, upload in (
-            ("sku", sku),
-            ("yun_template", yun_template),
-            ("sf_template", sf_template),
-            ("dp_template", dp_template),
-        )
-        if upload is not None and upload.filename
-    ]
-    if not selected:
-        return HTMLResponse(page("未选择文件", '<section class="login"><h1>没有选择配置文件</h1><p class="lead">请选择至少一个需要更新的文件。</p><a class="button" href="/config">返回固定配置</a></section>', user), status_code=400)
+    dp_template: UploadFile | None …123 tokens truncated…文件", '<section class="login"><h1>没有选择配置文件</h1><p class="lead">请选择至少一个需要更新的文件。</p><a class="button" href="/config">返回固定配置</a></section>', user), status_code=400)
     allowed = {"sf_template": {".xlsm"}}
-    for key, upload in selected:
-        path = await save_upload(upload, CONFIG, allowed.get(key, {".xlsx"}))
-        path.replace(config_path(key))
+    staging = CONFIG / f".staging-{secrets.token_hex(8)}"
+    staged: dict[str, Path] = {}
+    try:
+        for key, upload in selected:
+            path = await save_upload(upload, staging, allowed.get(key, {".xlsx"}))
+            await run_in_threadpool(validate_config_upload, key, path)
+            staged[key] = path
+        async with WORKFLOW_LOCK:
+            for key, path in staged.items():
+                path.replace(config_path(key))
+    except Exception as exc:
+        return HTMLResponse(
+            page(
+                "配置保存失败",
+                '<section class="login"><h1>配置未更新</h1>'
+                f'<p class="lead">{html.escape(str(exc))}</p>'
+                '<a class="button" href="/config">返回固定配置</a></section>',
+                user,
+            ),
+            status_code=400,
+        )
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)
     return RedirectResponse("/config", status_code=303)
 
 
@@ -355,6 +421,123 @@ def create_user(request: Request, email: str = Form(...), password: str = Form(.
     return RedirectResponse("/admin", status_code=303)
 
 
+def execute_workflow(
+    user_id: int,
+    step: int,
+    date: str,
+    source: Path,
+    platform: str,
+    business_type: str,
+    battery: str,
+) -> tuple[Path, Path | None]:
+    batch = batch_dir(user_id, platform)
+    output = RESULTS / str(user_id) / date.replace("-", "") / platform
+    output.mkdir(parents=True, exist_ok=True)
+    commit_target: Path | None = None
+
+    if step == 1:
+        commit_target = batch / "dp_orders.csv"
+        if platform == "yunexpress":
+            code, out, err = script(
+                generate_yunexpress_template,
+                [
+                    "--dp-orders-csv", str(source),
+                    "--sku-xlsx", str(config_path("sku")),
+                    "--yunexpress-template-xlsx", str(config_path("yun_template")),
+                    "--date", date,
+                    "--output-root", str(output),
+                ],
+            )
+        else:
+            if business_type not in generate_sf_international_template.SF_BUSINESS_TYPES:
+                raise ValueError("请选择本批顺丰国际订单的业务类型")
+            if battery not in generate_sf_international_template.BATTERY_OPTIONS:
+                raise ValueError("顺丰带电选项必须为“是”或“否”")
+            code, out, err = script(
+                generate_sf_international_template,
+                [
+                    "--dp-orders-csv", str(source),
+                    "--sku-xlsx", str(config_path("sku")),
+                    "--sf-template-xlsm", str(config_path("sf_template")),
+                    "--business-type", business_type,
+                    "--battery", battery,
+                    "--date", date,
+                    "--output-root", str(output),
+                ],
+            )
+    elif step == 2:
+        dp_orders = batch / "dp_orders.csv"
+        if not dp_orders.exists():
+            raise ValueError("为防止回填错批次，请先在同一账号和承运平台完成第 1 步")
+        if platform == "yunexpress":
+            commit_target = batch / "yun_orders.xlsx"
+            source_args = ["--yunexpress-xlsx", str(source)]
+        else:
+            commit_target = batch / f"sf_orders{source.suffix.lower()}"
+            source_args = ["--sf-international-file", str(source)]
+        code, out, err = script(
+            generate_dp_shipment_upload,
+            source_args
+            + [
+                "--dp-orders-csv", str(dp_orders),
+                "--shipment-template-xlsx", str(config_path("dp_template")),
+                "--date", date,
+                "--output-root", str(output),
+            ],
+        )
+    elif platform == "yunexpress":
+        dp_orders = batch / "dp_orders.csv"
+        yun_orders = batch / "yun_orders.xlsx"
+        if not dp_orders.exists() or not yun_orders.exists():
+            raise ValueError("云途面单分拣需要先在同一账号完成第 1、2 步")
+        code, out, err = script(
+            sort_yunexpress_labels_by_sku,
+            [
+                "--zip", str(source),
+                "--yunexpress-xlsx", str(yun_orders),
+                "--dp-orders-csv", str(dp_orders),
+                "--sku-xlsx", str(config_path("sku")),
+                "--date", date,
+                "--output-root", str(output),
+            ],
+        )
+    else:
+        code, out, err = script(
+            split_sf_labels_by_sender,
+            [
+                "--pdf", str(source),
+                "--date", date,
+                "--output-root", str(output),
+            ],
+        )
+
+    if code != 0:
+        raise ValueError(err.strip() or out.strip() or "处理失败")
+    if commit_target:
+        if platform == "sf" and step == 2:
+            for old in batch.glob("sf_orders.xls*"):
+                if old != commit_target:
+                    old.unlink(missing_ok=True)
+        source.replace(commit_target)
+    result = result_from(out)
+    report = result.with_suffix(".report.json") if result.is_file() else result / "校验成功报告.json"
+    package = (
+        result
+        if result.is_file()
+        else Path(
+            shutil.make_archive(
+                str(result),
+                "zip",
+                root_dir=result.parent,
+                base_dir=result.name,
+            )
+        )
+    )
+    if step == 3:
+        shutil.rmtree(batch, ignore_errors=True)
+    return package, report if report.exists() else None
+
+
 async def process(
     request: Request,
     step: int,
@@ -365,7 +548,9 @@ async def process(
     battery: str = "否",
 ):
     user = user_for(request)
-    if not user: return RedirectResponse("/login", status_code=303)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+    source: Path | None = None
     try:
         platform = normalize_platform(platform)
         date = normalize_date(date)
@@ -375,8 +560,6 @@ async def process(
             raise ValueError("请先在固定配置中上传：" + "、".join(missing))
 
         batch = batch_dir(user["id"], platform)
-        output = RESULTS / str(user["id"]) / date.replace("-", "") / platform
-        output.mkdir(parents=True, exist_ok=True)
         extensions = {
             (1, "yunexpress"): {".csv"},
             (1, "sf"): {".csv"},
@@ -385,102 +568,24 @@ async def process(
             (3, "yunexpress"): {".zip"},
             (3, "sf"): {".pdf"},
         }
-        ext = extensions[(step, platform)]
-        source = await save_upload(upload, batch, ext)
-        if step == 1:
-            target = batch / "dp_orders.csv"
-            target.unlink(missing_ok=True)
-            source.replace(target)
-            if platform == "yunexpress":
-                code, out, err = script(
-                    generate_yunexpress_template,
-                    [
-                        "--dp-orders-csv", str(target),
-                        "--sku-xlsx", str(config_path("sku")),
-                        "--yunexpress-template-xlsx", str(config_path("yun_template")),
-                        "--date", date,
-                        "--output-root", str(output),
-                    ],
-                )
-            else:
-                if business_type not in generate_sf_international_template.SF_BUSINESS_TYPES:
-                    raise ValueError("请选择本批顺丰国际订单的业务类型")
-                if battery not in generate_sf_international_template.BATTERY_OPTIONS:
-                    raise ValueError("顺丰带电选项必须为“是”或“否”")
-                code, out, err = script(
-                    generate_sf_international_template,
-                    [
-                        "--dp-orders-csv", str(target),
-                        "--sku-xlsx", str(config_path("sku")),
-                        "--sf-template-xlsm", str(config_path("sf_template")),
-                        "--business-type", business_type,
-                        "--battery", battery,
-                        "--date", date,
-                        "--output-root", str(output),
-                    ],
-                )
-        elif step == 2:
-            if platform == "yunexpress":
-                target = batch / "yun_orders.xlsx"
-                target.unlink(missing_ok=True)
-                source.replace(target)
-                source_args = ["--yunexpress-xlsx", str(target)]
-            else:
-                for old in batch.glob("sf_orders.xls*"):
-                    old.unlink(missing_ok=True)
-                target = batch / f"sf_orders{source.suffix.lower()}"
-                source.replace(target)
-                source_args = ["--sf-international-file", str(target)]
-            code, out, err = script(
-                generate_dp_shipment_upload,
-                source_args
-                + [
-                    "--shipment-template-xlsx", str(config_path("dp_template")),
-                    "--date", date,
-                    "--output-root", str(output),
-                ],
+        source = await save_upload(upload, batch, extensions[(step, platform)])
+        async with WORKFLOW_LOCK:
+            package, report = await run_in_threadpool(
+                execute_workflow,
+                user["id"],
+                step,
+                date,
+                source,
+                platform,
+                business_type,
+                battery,
             )
-        else:
-            if platform == "yunexpress":
-                target = batch / "labels.zip"
-                target.unlink(missing_ok=True)
-                source.replace(target)
-                dp_orders = batch / "dp_orders.csv"
-                yun_orders = batch / "yun_orders.xlsx"
-                if not dp_orders.exists() or not yun_orders.exists():
-                    raise ValueError("云途面单分拣需要先在同一账号完成第 1、2 步")
-                code, out, err = script(
-                    sort_yunexpress_labels_by_sku,
-                    [
-                        "--zip", str(target),
-                        "--yunexpress-xlsx", str(yun_orders),
-                        "--dp-orders-csv", str(dp_orders),
-                        "--sku-xlsx", str(config_path("sku")),
-                        "--date", date,
-                        "--output-root", str(output),
-                    ],
-                )
-            else:
-                target = batch / "sf_labels.pdf"
-                target.unlink(missing_ok=True)
-                source.replace(target)
-                code, out, err = script(
-                    split_sf_labels_by_sender,
-                    [
-                        "--pdf", str(target),
-                        "--date", date,
-                        "--output-root", str(output),
-                    ],
-                )
-        if code != 0: raise ValueError(err.strip() or out.strip() or "处理失败")
-        result = result_from(out)
-        report = result.with_suffix(".report.json") if result.is_file() else result / "校验成功报告.json"
-        package = result if result.is_file() else Path(shutil.make_archive(str(result), "zip", root_dir=result.parent, base_dir=result.name))
         step_name = f"步骤 {step} · {PLATFORM_LABELS[platform]}"
-        add_run(user["id"], step_name, date, "SUCCESS", package, report if report.exists() else None)
-        if step == 3: shutil.rmtree(batch, ignore_errors=True)
+        add_run(user["id"], step_name, date, "SUCCESS", package, report)
         return FileResponse(package, filename=package.name)
     except Exception as exc:
+        if source and source.exists():
+            source.unlink(missing_ok=True)
         label = PLATFORM_LABELS.get(platform, "未知平台") if isinstance(platform, str) else "未知平台"
         add_run(user["id"], f"步骤 {step} · {label}", date, "FAILED", None, None, str(exc))
         return HTMLResponse(page("处理失败", f'<section class="login"><h1>处理失败</h1><p class="lead">{html.escape(str(exc))}</p><a class="button" href="/">返回工作台</a></section>', user), status_code=400)
@@ -531,6 +636,13 @@ CSS = r'''
 '''
 
 SCRIPT = r'''
+const localToday = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+  .toISOString()
+  .slice(0, 10);
+document.querySelectorAll('input[type="date"]').forEach((input) => {
+  input.value = localToday;
+});
+
 document.querySelectorAll('.workflow-form').forEach((form) => {
   const article = form.closest('article');
   const fileInput = form.querySelector('input[type="file"]');

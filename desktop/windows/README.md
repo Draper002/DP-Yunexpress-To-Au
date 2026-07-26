@@ -5,7 +5,7 @@ DropShipZone 澳大利亚订单到云途或顺丰国际发货的本地桌面工�
 ## 当前功能
 
 1. 第 1 步可选择云途或顺丰国际，并生成相应批量寄件 Excel。
-2. 从云途或顺丰国际订单信息生成 DP 发货回填模板。
+2. 从云途或顺丰国际订单信息生成 DP 发货回填模板，并自动与第 1 步 DP 订单逐单核对。
 3. 云途面单按 SKU 分拣并生成供应商 ZIP；顺丰合并面单按寄方姓名拆成供应商 PDF。
 
 顺丰国际当前三步均已接入：批量上传、运单号回填 DP、合并面单按寄方姓名拆分。
@@ -13,8 +13,8 @@ DropShipZone 澳大利亚订单到云途或顺丰国际发货的本地桌面工�
 ## 当前状态
 
 - Windows：业务流程已验证，OS 26 风格浅色界面已打包测试。
-- macOS：M5 MacBook Air / macOS 26 的 arm64 版本待开发。
-- Web：云服务器多账号 MVP 已开始，见 [`../../web/README.md`](../../web/README.md) 和 [`../../web/docs/WEB_DEVELOPMENT_PROGRESS.md`](../../web/docs/WEB_DEVELOPMENT_PROGRESS.md)。
+- macOS：M5 MacBook Air / macOS 26 的共用源码与 arm64 打包配置已完成，待 Mac 实机构建。
+- Web：云途与顺丰三步、多账号隔离和 Docker 部署包已完成，见 [`../../web/README.md`](../../web/README.md) 和 [`../../web/docs/WEB_DEVELOPMENT_PROGRESS.md`](../../web/docs/WEB_DEVELOPMENT_PROGRESS.md)。
 - 最新进度：见 [`../../docs/DEVELOPMENT_PROGRESS.md`](../../docs/DEVELOPMENT_PROGRESS.md)。
 - Mac 交接：见 [`../macos/MACOS_M5_HANDOFF_ZH.md`](../macos/MACOS_M5_HANDOFF_ZH.md)。
 

@@ -304,15 +304,16 @@ def write_template(
     output_root: Path,
 ) -> Path:
     workbook = openpyxl.load_workbook(template_path, data_only=False, read_only=True)
-    sheet = workbook["标准上传格式"] if "标准上传格式" in workbook.sheetnames else workbook.worksheets[0]
-    columns = header_columns(sheet)
-    sheet_name = sheet.title
+    try:
+        sheet = workbook["标准上传格式"] if "标准上传格式" in workbook.sheetnames else workbook.worksheets[0]
+        columns = header_columns(sheet)
+        sheet_name = sheet.title
 
-    missing_headers = sorted(header for header in HEADER.values() if header not in columns)
-    if missing_headers:
-        raise ValueError("SF template missing headers: " + json.dumps(missing_headers, ensure_ascii=False))
-
-    workbook.close()
+        missing_headers = sorted(header for header in HEADER.values() if header not in columns)
+        if missing_headers:
+            raise ValueError("SF template missing headers: " + json.dumps(missing_headers, ensure_ascii=False))
+    finally:
+        workbook.close()
 
     output_dir = output_root / "顺丰国际上传模板"
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -326,37 +327,42 @@ def write_template(
 
 def validate_output(path: Path) -> dict[str, object]:
     workbook = openpyxl.load_workbook(path, data_only=True, keep_vba=True)
-    sheet = workbook["标准上传格式"] if "标准上传格式" in workbook.sheetnames else workbook.worksheets[0]
-    columns = header_columns(sheet)
-    order_id_col = columns[HEADER["order_id"]]
-    row_indexes = [
-        row for row in range(2, sheet.max_row + 1) if clean(sheet.cell(row, order_id_col).value)
-    ]
-    missing = [
-        (row, key)
-        for row in row_indexes
-        for key in REQUIRED_KEYS
-        if sheet.cell(row, columns[HEADER[key]]).value in (None, "")
-    ]
-    order_ids = [clean(sheet.cell(row, order_id_col).value) for row in row_indexes]
-    duplicate_order_ids = sorted(order_id for order_id, count in Counter(order_ids).items() if count > 1)
-    return {
-        "row_count": len(row_indexes),
-        "required_missing_count": len(missing),
-        "duplicate_order_ids": duplicate_order_ids,
-        "business_types": dict(
-            Counter(clean(sheet.cell(row, columns[HEADER["business_type"]]).value) for row in row_indexes)
-        ),
-        "countries": dict(
-            Counter(clean(sheet.cell(row, columns[HEADER["country"]]).value) for row in row_indexes)
-        ),
-        "currencies": dict(
-            Counter(clean(sheet.cell(row, columns[HEADER["currency"]]).value) for row in row_indexes)
-        ),
-        "battery": dict(
-            Counter(clean(sheet.cell(row, columns[HEADER["battery"]]).value) for row in row_indexes)
-        ),
-    }
+    try:
+        sheet = workbook["标准上传格式"] if "标准上传格式" in workbook.sheetnames else workbook.worksheets[0]
+        columns = header_columns(sheet)
+        order_id_col = columns[HEADER["order_id"]]
+        row_indexes = [
+            row for row in range(2, sheet.max_row + 1) if clean(sheet.cell(row, order_id_col).value)
+        ]
+        missing = [
+            (row, key)
+            for row in row_indexes
+            for key in REQUIRED_KEYS
+            if sheet.cell(row, columns[HEADER[key]]).value in (None, "")
+        ]
+        order_ids = [clean(sheet.cell(row, order_id_col).value) for row in row_indexes]
+        duplicate_order_ids = sorted(
+            order_id for order_id, count in Counter(order_ids).items() if count > 1
+        )
+        return {
+            "row_count": len(row_indexes),
+            "required_missing_count": len(missing),
+            "duplicate_order_ids": duplicate_order_ids,
+            "business_types": dict(
+                Counter(clean(sheet.cell(row, columns[HEADER["business_type"]]).value) for row in row_indexes)
+            ),
+            "countries": dict(
+                Counter(clean(sheet.cell(row, columns[HEADER["country"]]).value) for row in row_indexes)
+            ),
+            "currencies": dict(
+                Counter(clean(sheet.cell(row, columns[HEADER["currency"]]).value) for row in row_indexes)
+            ),
+            "battery": dict(
+                Counter(clean(sheet.cell(row, columns[HEADER["battery"]]).value) for row in row_indexes)
+            ),
+        }
+    finally:
+        workbook.close()
 
 
 def main() -> int:

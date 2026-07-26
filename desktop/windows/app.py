@@ -471,143 +471,7 @@ class App:
     def select_step(self, index: int):
         self.current_step = index
         for idx, button in enumerate(self.nav_buttons):
-            if idx == index:
-                button.configure(
-                    bg=self.COLORS["surface"],
-                    fg=self.COLORS["accent_dark"],
-                    activebackground="#ffffff",
-                    activeforeground=self.COLORS["accent_dark"],
-                )
-            else:
-                button.configure(
-                    bg="#dfe8f3",
-                    fg=self.COLORS["muted"],
-                    activebackground="#e8eff7",
-                    activeforeground=self.COLORS["ink"],
-                )
-        self.render_step()
-
-    def render_step(self):
-        for child in self.step_panel.winfo_children():
-            child.destroy()
-        self.action_buttons.clear()
-        self.result_buttons.clear()
-
-        step = self.active_step()
-        self.step_panel.grid_columnconfigure(0, weight=1)
-        for row in range(4):
-            self.step_panel.grid_rowconfigure(row, weight=0)
-
-        header = tk.Frame(self.step_panel, bg=self.COLORS["surface"])
-        header.grid(row=0, column=0, sticky="ew")
-        header.grid_columnconfigure(1, weight=1)
-
-        tk.Label(
-            header,
-            text=f"STEP {step['index']}",
-            bg=self.COLORS["accent_soft"],
-            fg=self.COLORS["accent_dark"],
-            font=("Segoe UI", 9, "bold"),
-            width=8,
-            padx=6,
-            pady=5,
-        ).grid(row=0, column=0, rowspan=2, sticky="w", padx=(0, 13))
-        tk.Label(
-            header,
-            text=step["title"],
-            bg=self.COLORS["surface"],
-            fg=self.COLORS["ink"],
-            font=("Microsoft YaHei UI", 16, "bold"),
-        ).grid(row=0, column=1, sticky="w")
-        tk.Label(
-            header,
-            text=f"{step['summary']}  {step['when']}",
-            bg=self.COLORS["surface"],
-            fg=self.COLORS["muted"],
-            font=("Microsoft YaHei UI", 9),
-            wraplength=820,
-            justify="left",
-        ).grid(row=1, column=1, sticky="w", pady=(3, 0))
-
-        body = self.card(self.step_panel, pad=13, bg=self.COLORS["soft"])
-        body.grid(row=1, column=0, sticky="ew", pady=(8, 0))
-        body.grid_columnconfigure(0, weight=1)
-
-        body_head = tk.Frame(body, bg=self.COLORS["soft"])
-        body_head.grid(row=0, column=0, sticky="ew", pady=(0, 5))
-        body_head.grid_columnconfigure(1, weight=1)
-        tk.Label(
-            body_head,
-            text="本次需要提供的文件",
-            bg=self.COLORS["soft"],
-            fg=self.COLORS["ink"],
-            font=("Microsoft YaHei UI", 11, "bold"),
-        ).grid(row=0, column=0, sticky="w")
-        if self.current_step in (0, 1, 2):
-            self.platform_selector(body_head).grid(row=0, column=1, sticky="w", padx=(18, 0))
-
-        fixed_tip = tk.Frame(body_head, bg=self.COLORS["soft"])
-        fixed_tip.grid(row=0, column=2, sticky="e", padx=(12, 0))
-        sf_sender_split = self.current_step == 2 and self.vars["shipping_platform"].get() == "sf"
-        tk.Label(
-            fixed_tip,
-            text="无需固定配置" if sf_sender_split else "固定配置",
-            bg=self.COLORS["soft"],
-            fg=self.COLORS["muted"],
-            font=("Microsoft YaHei UI", 9),
-        ).pack(side="left")
-        self.info_dot(
-            fixed_tip,
-            (
-                "顺丰面单按每页的寄方姓名直接拆分，不使用订单表、SKU 商品库或固定模板。"
-                if sf_sender_split
-                else "SKU商品库、云途/顺丰标准模板、DP发货模板通常不用每天选择。只有模板或SKU信息更新时，才到右上角“固定配置”里维护。"
-            ),
-            bg=self.COLORS["soft"],
-        ).pack(side="left", padx=(4, 0))
-
-        for row, (label, key, filetypes) in enumerate(step["files"], start=1):
-            self.file_field(body, row, label, key, filetypes)
-
-        if self.current_step == 0 and self.vars["shipping_platform"].get() == "sf":
-            self.sf_options_field(body, len(step["files"]) + 1)
-
-        action = tk.Frame(
-            self.step_panel,
-            bg=self.COLORS["surface"],
-            padx=12,
-            pady=9,
-            highlightthickness=1,
-            highlightbackground=self.COLORS["line"],
-        )
-        action.grid(row=2, column=0, sticky="ew", pady=(8, 0))
-        action.grid_columnconfigure(0, weight=1)
-        action_hint = tk.Frame(action, bg=self.COLORS["surface"])
-        action_hint.grid(row=0, column=0, sticky="w")
-        tk.Label(
-            action_hint,
-            text="确认文件后开始处理",
-            bg=self.COLORS["surface"],
-            fg=self.COLORS["ink"],
-            font=("Microsoft YaHei UI", 9, "bold"),
-        ).pack(side="left")
-        self.info_dot(
-            action_hint,
-            f"{step['config_note']}\n如果缺少必要文件，工具会停止并在日志里提示原因。",
-            bg=self.COLORS["surface"],
-            fg=self.COLORS["muted"],
-        ).pack(side="left", padx=(6, 0))
-        tk.Frame(action_hint, bg=self.COLORS["line"], width=1, height=18).pack(side="left", padx=14)
-        tk.Label(
-            action_hint,
-            text="完成后",
-            bg=self.COLORS["surface"],
-            fg=self.COLORS["muted"],
-            font=("Microsoft YaHei UI", 9),
-        ).pack(side="left")
-        self.info_dot(
-            action_hint,
-            step["after"],
+            if idx == inde…1350 tokens truncated…["after"],
             bg=self.COLORS["surface"],
             fg=self.COLORS["muted"],
         ).pack(side="left", padx=(6, 0))
@@ -1065,6 +929,13 @@ class App:
         source_key = "sf_orders" if platform == "sf" else "yun_orders"
         if not self.require_files([source_key, "dp_template"]):
             return
+        dp_orders = Path(self.vars["dp_orders"].get())
+        if not dp_orders.is_file():
+            messagebox.showerror(
+                "缺少本批 DP 订单",
+                "为防止回填错批次，请先完成第1步。第2步会自动复用第1步的 DP 订单 CSV，无需再次选择。",
+            )
+            return
         source_args = (
             ["--sf-international-file", self.vars["sf_orders"].get()]
             if platform == "sf"
@@ -1076,6 +947,8 @@ class App:
             self.base_cmd("generate_dp_shipment_upload.py")
             + source_args
             + [
+                "--dp-orders-csv",
+                str(dp_orders),
                 "--shipment-template-xlsx",
                 self.vars["dp_template"].get(),
             ],
