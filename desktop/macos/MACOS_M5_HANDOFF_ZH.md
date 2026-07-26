@@ -1,4 +1,8 @@
-# DP&Yunexpress To Au - MacBook M5 / macOS 26 开发交接文档
+# DP International Fulfillment To Au - MacBook M5 / macOS 26 开发交接文档
+
+更新时间：`2026-07-26 21:10 CST (Asia/Shanghai)`
+
+当前仓库已经提供 `desktop/macos/app.py`、Apple Silicon 打包配置和构建脚本。Mac 端下一位 Codex 不需要重新移植业务代码，重点是在 M5 实机完成运行、界面、输出一致性和 `.app` 构建验证。
 
 ## 1. 项目目标
 
@@ -22,8 +26,10 @@ desktop/macos/
 shared/fulfillment/
 ├── __init__.py
 ├── generate_yunexpress_template.py
+├── generate_sf_international_template.py
 ├── generate_dp_shipment_upload.py
-└── sort_yunexpress_labels_by_sku.py
+├── sort_yunexpress_labels_by_sku.py
+└── split_sf_labels_by_sender.py
 web/app.py
 ```
 
@@ -41,22 +47,22 @@ Windows 生成的 *.spec
 
 ## 3. 不允许改变的业务规则
 
-### 第 1 步：生成云途上传模板
+### 第 1 步：生成物流平台上传模板
 
-- 用户本次选择 DP 订单 CSV。
-- 自动沿用固定配置中的 SKU 商品库和云途标准模板。
+- 用户选择云途或顺丰国际，并提供本次 DP 订单 CSV。
+- 自动沿用固定配置中的 SKU 商品库及对应物流模板。
 - 产品代码固定为 `THPHR`。
 - 国家固定为 `AU`。
-- 申报币种固定为 `USD`。
+- 云途申报币种固定为 `USD`；顺丰为 `USD/美元`。
 - 订单状态筛选规则保持现有脚本实现，不擅自修改字段映射。
-- 输出云途批量寄件 Excel。
+- 输出对应物流平台的批量寄件 Excel。
 
 ### 第 2 步：生成 DP 发货回填模板
 
-- 用户本次只选择云途订单信息 Excel。
-- 自动沿用第 1 步的 DP 订单 CSV。
+- 用户选择云途或顺丰国际，并提供对应订单信息 Excel。
 - 自动沿用固定配置中的 DP 发货模板。
-- 承运商保持为 `YunExpress`。
+- 云途承运商为 `YunExpress`；顺丰承运商为 `SF INTERNATIONAL`。
+- 顺丰“客户订单号”映射 DP `Order ID`，“顺丰运单号”映射 `Tracking Number`。
 - 运单号必须按订单正确回填，不允许仅按表格行号匹配。
 
 ### 第 3 步：按 SKU 分拣云途面单
@@ -70,6 +76,13 @@ Windows 生成的 *.spec
 - 单个 SKU 文件夹内不要放发货明细表。
 - 总目录可以保留汇总表和校验报告。
 - 任何未匹配、重复匹配、缺少 PDF 或数量不一致都必须明确报错或写入校验报告，不能静默忽略。
+
+顺丰国际模式：
+
+- 用户本次只选择顺丰合并面单 PDF。
+- 按每页面单中的“寄方姓名”分组，不依赖订单表或 SKU 商品库。
+- 每个寄方输出一个合并 PDF，文件名包含日期、寄方姓名和面单数量。
+- 每页必须存在一个寄方姓名和一个唯一顺丰运单号；缺失或重复时停止输出。
 
 ## 4. 输出目录规则
 
@@ -89,29 +102,17 @@ Mac 版本建议保持同样的用户可见结构：
 
 日期默认采用 Mac 当前系统日期，格式为 `YYYY-MM-DD`，允许手动修改。
 
-## 5. macOS 必须修改的代码
+## 5. macOS 适配状态
 
-### 5.1 跨平台打开文件夹
+### 5.1 Finder 打开文件夹：已完成
 
-`app.py` 当前使用：
-
-```python
-subprocess.Popen(["explorer", str(path)])
-```
-
-改成统一函数：
+`desktop/macos/app.py` 已继承共享桌面界面，并用 macOS `open` 命令覆盖两个目录打开动作：
 
 ```python
-def open_folder(path: Path):
-    if sys.platform == "darwin":
-        subprocess.Popen(["open", str(path)])
-    elif sys.platform == "win32":
-        subprocess.Popen(["explorer", str(path)])
-    else:
-        subprocess.Popen(["xdg-open", str(path)])
+subprocess.Popen(["open", str(path)])
 ```
 
-`open_output_dir()` 和 `open_last_result_dir()` 都调用该函数。
+需要在 Mac 实机确认“打开输出目录”和“打开本次结果”均打开 Finder。
 
 ### 5.2 统一输出路径
 
@@ -137,6 +138,7 @@ shared/fulfillment/sort_yunexpress_labels_by_sku.py
 
 - SKU 商品库路径
 - 云途标准模板路径
+- 顺丰国际标准模板路径
 - DP 发货模板路径
 - 输出根目录
 
@@ -160,7 +162,7 @@ Windows 可继续使用用户目录下的应用配置文件。不要把某台电
 
 ### 第一阶段：最低成本可用版本
 
-继续使用现有 Python、Tkinter 和 `openpyxl`：
+继续使用现有 Python、Tkinter、`openpyxl`、`xlrd` 和 `pypdf`：
 
 - 优点：业务代码复用最多，开发和验证最快。
 - 缺点：界面只能接近 macOS 风格，无法获得真正原生的液态玻璃效果。
@@ -184,7 +186,7 @@ Windows 可继续使用用户目录下的应用配置文件。不要把某台电
 1. Xcode Command Line Tools。
 2. Apple Silicon 原生 Python，建议 Python 3.11 或 3.12。
 3. 创建独立虚拟环境。
-4. 安装 `openpyxl` 和 `pyinstaller`。
+4. 安装 `openpyxl`、`xlrd`、`pypdf` 和 `pyinstaller`。
 
 示例命令：
 
@@ -194,7 +196,7 @@ cd "/源码所在目录"
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install openpyxl pyinstaller
+python -m pip install openpyxl xlrd pypdf pyinstaller
 python app.py
 ```
 
@@ -225,6 +227,8 @@ python -m PyInstaller \
   --onedir \
   --name "DP&Yunexpress To Au" \
   --collect-all openpyxl \
+  --collect-all xlrd \
+  --collect-all pypdf \
   app.py
 ```
 
@@ -267,10 +271,12 @@ hdiutil create \
 
 ### 功能测试
 
-- 第 1 步成功生成云途上传 Excel。
-- 云途后台能够成功接受生成的 Excel。
-- 第 2 步生成的 DP 发货模板能够被 DP 后台接受。
-- 第 3 步能够从总面单 ZIP 正确分拣 PDF。
+- 第 1 步分别成功生成云途上传 Excel 和顺丰国际上传 XLSM。
+- 云途及顺丰后台能够成功接受对应文件。
+- 第 2 步分别从云途订单信息和顺丰 `.xls/.xlsx` 生成可由 DP 接受的回填模板。
+- 顺丰 DP 回填的承运商必须为 `SF INTERNATIONAL`。
+- 第 3 步能够从云途总面单 ZIP 正确分拣 PDF。
+- 第 3 步能够从顺丰合并面单 PDF 按寄方姓名生成供应商 PDF。
 - 每个 SKU 文件夹内 PDF 数量与文件夹名称中的数量一致。
 - 每个供应商 ZIP 内文件数量、名称与同目录 PDF 完全一致。
 - 打开输出目录、打开结果目录在 macOS 上有效。
@@ -395,4 +401,3 @@ config.json
 - 在一台未安装开发环境的 Mac 上测试首次安装。
 
 在没有开发者账户前，不需要为第一版本阻塞开发，但交付物应明确标记为“本机测试版”。
-

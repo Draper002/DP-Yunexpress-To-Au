@@ -7,7 +7,7 @@ import sys
 import threading
 from pathlib import Path
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -22,14 +22,18 @@ if str(SHARED_ROOT) not in sys.path:
     sys.path.insert(0, str(SHARED_ROOT))
 
 import generate_dp_shipment_upload
+import generate_sf_international_template
 import generate_yunexpress_template
 import sort_yunexpress_labels_by_sku
+import split_sf_labels_by_sender
 
 
 SCRIPT_MODULES = {
     "generate_yunexpress_template.py": generate_yunexpress_template,
+    "generate_sf_international_template.py": generate_sf_international_template,
     "generate_dp_shipment_upload.py": generate_dp_shipment_upload,
     "sort_yunexpress_labels_by_sku.py": sort_yunexpress_labels_by_sku,
+    "split_sf_labels_by_sender.py": split_sf_labels_by_sender,
 }
 
 
@@ -38,6 +42,16 @@ def latest_file(folder: Path, pattern: str) -> str:
     if not files:
         return ""
     return str(max(files, key=lambda p: p.stat().st_mtime))
+
+
+def latest_file_across(candidates: list[tuple[Path, str]]) -> str:
+    files = [
+        path
+        for folder, pattern in candidates
+        for path in folder.glob(pattern)
+        if path.is_file() and not path.name.startswith("~$")
+    ]
+    return str(max(files, key=lambda path: path.stat().st_mtime)) if files else ""
 
 
 def date_folder(date_text: str) -> Path:
@@ -104,14 +118,17 @@ class App:
         "dp_orders": "DP订单CSV",
         "sku": "SKU商品库",
         "yun_template": "云途标准模板",
+        "sf_template": "顺丰国际标准模板",
         "yun_orders": "云途订单信息",
+        "sf_orders": "顺丰国际订单数据",
         "dp_template": "DP发货模板",
         "label_zip": "云途面单ZIP",
+        "sf_label_pdf": "顺丰国际面单PDF",
     }
 
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.root.title("DP&Yunexpress To Au")
+        self.root.title("DP International Fulfillment To Au")
         self.root.minsize(980, 570)
         self.root.configure(bg=self.COLORS["bg"])
 
@@ -121,9 +138,22 @@ class App:
             "dp_orders": tk.StringVar(value=latest_file(DEFAULT_DOWNLOADS, "Exported_Orders_*.csv")),
             "sku": tk.StringVar(value=latest_file(DEFAULT_SKU_DIR, "*SKU*.xlsx")),
             "yun_template": tk.StringVar(value=latest_file(DEFAULT_TEMPLATE_DIR, "*CN0C021578*.xlsx")),
+            "sf_template": tk.StringVar(
+                value=latest_file_across(
+                    [
+                        (DEFAULT_DOWNLOADS, "BatchImportOrders_*.xlsm"),
+                        (DEFAULT_TEMPLATE_DIR, "BatchImportOrders_*.xlsm"),
+                    ]
+                )
+            ),
             "yun_orders": tk.StringVar(value=latest_file(DEFAULT_DOWNLOADS, "订单信息_*.xlsx")),
+            "sf_orders": tk.StringVar(value=latest_file(DEFAULT_DOWNLOADS, "顺丰订单数据*.xls*")),
             "dp_template": tk.StringVar(value=latest_file(DEFAULT_TEMPLATE_DIR, "*Shipment_sample.xlsx")),
             "label_zip": tk.StringVar(value=latest_file(DEFAULT_DOWNLOADS, "运单标签*.zip")),
+            "sf_label_pdf": tk.StringVar(value=latest_file(DEFAULT_DOWNLOADS, "labelSF*.pdf")),
+            "shipping_platform": tk.StringVar(value="yunexpress"),
+            "sf_business_type": tk.StringVar(value="请选择业务类型"),
+            "sf_battery": tk.StringVar(value="否"),
         }
         self.output_dir = tk.StringVar(value=str(date_folder(today)))
         self.status_text = tk.StringVar(value="就绪")
@@ -133,10 +163,12 @@ class App:
         self.nav_buttons: list[tk.Button] = []
         self.action_buttons: list[tk.Button] = []
         self.result_buttons: list[tk.Button] = []
+        self.platform_buttons: dict[str, tk.Button] = {}
 
         self.config_files = [
             ("SKU商品库", "sku", [("Excel", "*.xlsx")]),
             ("云途标准模板", "yun_template", [("Excel", "*.xlsx")]),
+            ("顺丰国际标准模板", "sf_template", [("Excel 宏工作簿", "*.xlsm")]),
             ("DP发货模板", "dp_template", [("Excel", "*.xlsx")]),
         ]
 
@@ -164,7 +196,7 @@ class App:
                 "files": [
                     ("本次云途订单信息 Excel", "yun_orders", [("Excel", "*.xlsx")]),
                 ],
-                "config_note": "自动沿用第1步的 DP 订单 CSV；使用固定配置：DP发货模板。",
+                "config_note": "使用固定配置：DP发货模板。",
                 "button": "开始生成",
                 "after": "生成后上传到 DropShipZone 后台。成功后下载云途面单 ZIP，再做第3步。",
                 "command": self.run_dp,
@@ -229,14 +261,14 @@ class App:
         brand.grid(row=0, column=0, sticky="w")
         tk.Label(
             brand,
-            text="DP 到云途发货工具",
+            text="DP 国际发货工具",
             bg=self.COLORS["surface"],
             fg=self.COLORS["ink"],
             font=("Microsoft YaHei UI", 16, "bold"),
         ).grid(row=0, column=0, sticky="w")
         tk.Label(
             brand,
-            text="DropShipZone  ·  YunExpress",
+            text="DropShipZone  ·  YunExpress  ·  SF International",
             bg=self.COLORS["surface"],
             fg=self.COLORS["muted"],
             font=("Segoe UI", 8),
@@ -368,6 +400,74 @@ class App:
         )
         self.log.grid(row=1, column=0, sticky="nsew")
 
+    def active_step(self) -> dict[str, object]:
+        step = dict(self.steps[self.current_step])
+        if self.current_step == 0 and self.vars["shipping_platform"].get() == "sf":
+            step.update(
+                {
+                    "short": "顺丰上传",
+                    "nav": "DP订单 -> 顺丰模板",
+                    "title": "生成顺丰国际上传模板",
+                    "summary": "从 DP 订单 CSV 生成顺丰国际批量导入 Excel。",
+                    "config_note": "使用固定配置：SKU商品库、顺丰国际标准模板。请确认业务类型和是否带电。",
+                    "button": "生成顺丰模板",
+                    "after": "生成后到顺丰国际后台上传。创建订单成功后，下载“顺丰订单数据”，再做第2步。",
+                    "command": self.run_sf,
+                }
+            )
+        elif self.current_step == 1 and self.vars["shipping_platform"].get() == "sf":
+            step.update(
+                {
+                    "nav": "顺丰订单 -> DP上传",
+                    "title": "生成 DP 顺丰发货回填模板",
+                    "summary": "把顺丰国际运单号整理成 DP 后台可上传的发货文件。",
+                    "when": "顺丰国际订单已创建，并已下载“顺丰订单数据”Excel 后使用。",
+                    "files": [
+                        (
+                            "本次顺丰订单数据 Excel",
+                            "sf_orders",
+                            [("Excel", "*.xls *.xlsx"), ("Excel 97-2003", "*.xls"), ("Excel 工作簿", "*.xlsx")],
+                        )
+                    ],
+                    "config_note": "使用固定配置：DP发货模板。承运商固定为 SF INTERNATIONAL。",
+                    "button": "生成顺丰 DP 回填",
+                    "after": "生成后上传到 DropShipZone 后台。完成后下载顺丰合并面单 PDF，再做第3步。",
+                    "command": self.run_dp,
+                }
+            )
+        elif self.current_step == 2 and self.vars["shipping_platform"].get() == "sf":
+            step.update(
+                {
+                    "nav": "顺丰面单PDF -> 寄方分组",
+                    "title": "按寄方姓名拆分顺丰面单",
+                    "summary": "读取每页面单中的寄方姓名，生成每个供应商对应的合并 PDF。",
+                    "when": "顺丰国际合并面单 PDF 已下载后使用。",
+                    "files": [("本次顺丰国际面单 PDF", "sf_label_pdf", [("PDF", "*.pdf")])],
+                    "config_note": "顺丰模式不需要 DP 订单、顺丰订单信息或 SKU 商品库。",
+                    "button": "按寄方姓名拆分",
+                    "after": "每个寄方会得到一个合并 PDF；总目录保留分组汇总和校验报告。",
+                    "command": self.run_labels,
+                }
+            )
+        return step
+
+    def select_shipping_platform(self, platform: str):
+        if self.running:
+            messagebox.showwarning("正在处理", "当前任务还没有结束，请等待处理完成后再切换平台。")
+            return
+        self.vars["shipping_platform"].set(platform)
+        if self.nav_buttons:
+            if platform == "sf":
+                self.nav_buttons[0].configure(text="01  顺丰上传  DP订单 -> 顺丰模板")
+                self.nav_buttons[1].configure(text="02  DP回填  顺丰订单 -> DP上传")
+                self.nav_buttons[2].configure(text="03  面单分拆  顺丰PDF -> 寄方分组")
+            else:
+                self.nav_buttons[0].configure(text="01  云途上传  DP订单 -> 云途模板")
+                self.nav_buttons[1].configure(text="02  DP回填  云途订单 -> DP上传")
+                self.nav_buttons[2].configure(text="03  面单分拣  面单ZIP -> 供应商包")
+        if self.current_step in (0, 1, 2):
+            self.render_step()
+
     def select_step(self, index: int):
         self.current_step = index
         for idx, button in enumerate(self.nav_buttons):
@@ -393,7 +493,7 @@ class App:
         self.action_buttons.clear()
         self.result_buttons.clear()
 
-        step = self.steps[self.current_step]
+        step = self.active_step()
         self.step_panel.grid_columnconfigure(0, weight=1)
         for row in range(4):
             self.step_panel.grid_rowconfigure(row, weight=0)
@@ -443,23 +543,34 @@ class App:
             fg=self.COLORS["ink"],
             font=("Microsoft YaHei UI", 11, "bold"),
         ).grid(row=0, column=0, sticky="w")
+        if self.current_step in (0, 1, 2):
+            self.platform_selector(body_head).grid(row=0, column=1, sticky="w", padx=(18, 0))
+
         fixed_tip = tk.Frame(body_head, bg=self.COLORS["soft"])
-        fixed_tip.grid(row=0, column=1, sticky="e")
+        fixed_tip.grid(row=0, column=2, sticky="e", padx=(12, 0))
+        sf_sender_split = self.current_step == 2 and self.vars["shipping_platform"].get() == "sf"
         tk.Label(
             fixed_tip,
-            text="固定配置",
+            text="无需固定配置" if sf_sender_split else "固定配置",
             bg=self.COLORS["soft"],
             fg=self.COLORS["muted"],
             font=("Microsoft YaHei UI", 9),
         ).pack(side="left")
         self.info_dot(
             fixed_tip,
-            "SKU商品库、云途标准模板、DP发货模板通常不用每天选择。只有模板或SKU信息更新时，才到右上角“固定配置”里维护。",
+            (
+                "顺丰面单按每页的寄方姓名直接拆分，不使用订单表、SKU 商品库或固定模板。"
+                if sf_sender_split
+                else "SKU商品库、云途/顺丰标准模板、DP发货模板通常不用每天选择。只有模板或SKU信息更新时，才到右上角“固定配置”里维护。"
+            ),
             bg=self.COLORS["soft"],
         ).pack(side="left", padx=(4, 0))
 
         for row, (label, key, filetypes) in enumerate(step["files"], start=1):
             self.file_field(body, row, label, key, filetypes)
+
+        if self.current_step == 0 and self.vars["shipping_platform"].get() == "sf":
+            self.sf_options_field(body, len(step["files"]) + 1)
 
         action = tk.Frame(
             self.step_panel,
@@ -509,6 +620,78 @@ class App:
 
         self.set_running(self.running)
         self.update_result_buttons()
+
+    def platform_selector(self, parent):
+        selector = tk.Frame(
+            parent,
+            bg="#dfe8f3",
+            padx=3,
+            pady=3,
+            highlightthickness=1,
+            highlightbackground="#d4dfec",
+        )
+        self.platform_buttons.clear()
+        current = self.vars["shipping_platform"].get()
+        for column, (key, label) in enumerate((("yunexpress", "云途"), ("sf", "顺丰国际"))):
+            selected = key == current
+            button = tk.Button(
+                selector,
+                text=label,
+                command=lambda value=key: self.select_shipping_platform(value),
+                bg=self.COLORS["surface"] if selected else "#dfe8f3",
+                fg=self.COLORS["accent_dark"] if selected else self.COLORS["muted"],
+                activebackground="#ffffff",
+                activeforeground=self.COLORS["accent_dark"],
+                relief="flat",
+                bd=0,
+                padx=12,
+                pady=3,
+                cursor="hand2",
+                font=("Microsoft YaHei UI", 9, "bold"),
+            )
+            button.grid(row=0, column=column, padx=(0, 3) if column == 0 else 0)
+            self.platform_buttons[key] = button
+        return selector
+
+    def sf_options_field(self, parent, row):
+        field = tk.Frame(parent, bg=self.COLORS["soft"])
+        field.grid(row=row, column=0, sticky="ew", pady=(5, 2))
+        field.grid_columnconfigure(1, weight=1)
+
+        tk.Label(
+            field,
+            text="顺丰业务类型",
+            bg=self.COLORS["soft"],
+            fg=self.COLORS["ink"],
+            font=("Microsoft YaHei UI", 9, "bold"),
+            width=25,
+            anchor="w",
+        ).grid(row=0, column=0, sticky="w", padx=(0, 8))
+        business_type = ttk.Combobox(
+            field,
+            textvariable=self.vars["sf_business_type"],
+            values=generate_sf_international_template.SF_BUSINESS_TYPES,
+            state="readonly",
+            font=("Microsoft YaHei UI", 9),
+        )
+        business_type.grid(row=0, column=1, sticky="ew", padx=(0, 12))
+
+        tk.Label(
+            field,
+            text="是否带电",
+            bg=self.COLORS["soft"],
+            fg=self.COLORS["ink"],
+            font=("Microsoft YaHei UI", 9, "bold"),
+        ).grid(row=0, column=2, sticky="e", padx=(0, 8))
+        battery = ttk.Combobox(
+            field,
+            textvariable=self.vars["sf_battery"],
+            values=generate_sf_international_template.BATTERY_OPTIONS,
+            state="readonly",
+            width=7,
+            font=("Microsoft YaHei UI", 9),
+        )
+        battery.grid(row=0, column=3, sticky="e")
 
     def file_field(self, parent, row, label, key, filetypes):
         field = tk.Frame(parent, bg=self.COLORS["soft"])
@@ -629,8 +812,8 @@ class App:
     def open_config_dialog(self):
         dialog = tk.Toplevel(self.root)
         dialog.title("固定配置")
-        dialog.geometry("820x350")
-        dialog.minsize(760, 330)
+        dialog.geometry("820x410")
+        dialog.minsize(760, 390)
         dialog.configure(bg=self.COLORS["bg"])
         dialog.transient(self.root)
         dialog.grab_set()
@@ -660,7 +843,7 @@ class App:
             self.config_file_field(panel, row, label, key, filetypes)
 
         actions = tk.Frame(panel, bg=self.COLORS["surface"])
-        actions.grid(row=6, column=0, sticky="ew", pady=(14, 0))
+        actions.grid(row=len(self.config_files) + 2, column=0, sticky="ew", pady=(14, 0))
         actions.grid_columnconfigure(0, weight=1)
         self.secondary_button(actions, "自动识别固定配置", self.autofill_config).grid(row=0, column=0, sticky="w")
         self.primary_button(actions, "保存并关闭", dialog.destroy).grid(row=0, column=1, sticky="e")
@@ -694,13 +877,23 @@ class App:
     def autofill_latest(self):
         self.vars["dp_orders"].set(latest_file(DEFAULT_DOWNLOADS, "Exported_Orders_*.csv"))
         self.vars["yun_orders"].set(latest_file(DEFAULT_DOWNLOADS, "订单信息_*.xlsx"))
+        self.vars["sf_orders"].set(latest_file(DEFAULT_DOWNLOADS, "顺丰订单数据*.xls*"))
         self.vars["label_zip"].set(latest_file(DEFAULT_DOWNLOADS, "运单标签*.zip"))
+        self.vars["sf_label_pdf"].set(latest_file(DEFAULT_DOWNLOADS, "labelSF*.pdf"))
         self.autofill_config(write_log=False)
         self.write("已重新识别本次批次文件，并同步检查固定配置。请确认路径是否对应当前批次。")
 
     def autofill_config(self, write_log=True):
         self.vars["sku"].set(latest_file(DEFAULT_SKU_DIR, "*SKU*.xlsx"))
         self.vars["yun_template"].set(latest_file(DEFAULT_TEMPLATE_DIR, "*CN0C021578*.xlsx"))
+        self.vars["sf_template"].set(
+            latest_file_across(
+                [
+                    (DEFAULT_DOWNLOADS, "BatchImportOrders_*.xlsm"),
+                    (DEFAULT_TEMPLATE_DIR, "BatchImportOrders_*.xlsm"),
+                ]
+            )
+        )
         self.vars["dp_template"].set(latest_file(DEFAULT_TEMPLATE_DIR, "*Shipment_sample.xlsx"))
         if write_log:
             self.write("已重新识别固定配置。SKU 商品库和模板如果没有更新，平时不需要改。")
@@ -827,6 +1020,30 @@ class App:
             raise ValueError("invalid date")
         return [script, "--date", self.vars["date"].get(), "--output-root", self.output_dir.get()]
 
+    def run_sf(self):
+        if not self.require_files(["dp_orders", "sku", "sf_template"]):
+            return
+        business_type = self.vars["sf_business_type"].get()
+        if business_type not in generate_sf_international_template.SF_BUSINESS_TYPES:
+            messagebox.showerror("请选择业务类型", "请先选择本批顺丰国际订单使用的业务类型。")
+            return
+        self.run_cmd(
+            "第1步 生成顺丰国际上传模板",
+            self.base_cmd("generate_sf_international_template.py")
+            + [
+                "--dp-orders-csv",
+                self.vars["dp_orders"].get(),
+                "--sku-xlsx",
+                self.vars["sku"].get(),
+                "--sf-template-xlsm",
+                self.vars["sf_template"].get(),
+                "--business-type",
+                business_type,
+                "--battery",
+                self.vars["sf_battery"].get(),
+            ],
+        )
+
     def run_yun(self):
         if not self.require_files(["dp_orders", "sku", "yun_template"]):
             return
@@ -844,22 +1061,36 @@ class App:
         )
 
     def run_dp(self):
-        if not self.require_files(["yun_orders", "dp_template", "dp_orders"]):
+        platform = self.vars["shipping_platform"].get()
+        source_key = "sf_orders" if platform == "sf" else "yun_orders"
+        if not self.require_files([source_key, "dp_template"]):
             return
+        source_args = (
+            ["--sf-international-file", self.vars["sf_orders"].get()]
+            if platform == "sf"
+            else ["--yunexpress-xlsx", self.vars["yun_orders"].get()]
+        )
+        title = "第2步 生成顺丰 DP 回填模板" if platform == "sf" else "第2步 生成云途 DP 回填模板"
         self.run_cmd(
-            "第2步 生成 DP 回填模板",
+            title,
             self.base_cmd("generate_dp_shipment_upload.py")
+            + source_args
             + [
-                "--yunexpress-xlsx",
-                self.vars["yun_orders"].get(),
                 "--shipment-template-xlsx",
                 self.vars["dp_template"].get(),
-                "--dp-orders-csv",
-                self.vars["dp_orders"].get(),
             ],
         )
 
     def run_labels(self):
+        if self.vars["shipping_platform"].get() == "sf":
+            if not self.require_files(["sf_label_pdf"]):
+                return
+            self.run_cmd(
+                "第3步 按寄方姓名拆分顺丰面单",
+                self.base_cmd("split_sf_labels_by_sender.py")
+                + ["--pdf", self.vars["sf_label_pdf"].get()],
+            )
+            return
         if not self.require_files(["label_zip", "yun_orders", "dp_orders", "sku"]):
             return
         self.run_cmd(
@@ -882,4 +1113,3 @@ if __name__ == "__main__":
     app_root = tk.Tk()
     App(app_root)
     app_root.mainloop()
-

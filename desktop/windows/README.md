@@ -1,12 +1,14 @@
-# DP&Yunexpress To Au
+# DP International Fulfillment To Au
 
-DropShipZone 澳大利亚订单到云途发货的本地桌面工具，同时维护 Windows 与 Apple Silicon macOS 版本。
+DropShipZone 澳大利亚订单到云途或顺丰国际发货的本地桌面工具，同时维护 Windows 与 Apple Silicon macOS 版本。
 
 ## 当前功能
 
-1. 从 DP 订单 CSV 生成云途批量寄件 Excel。
-2. 从云途订单信息生成 DP 发货回填模板。
-3. 按 SKU 分拣云途面单 PDF，并为每个供应商生成独立 ZIP。
+1. 第 1 步可选择云途或顺丰国际，并生成相应批量寄件 Excel。
+2. 从云途或顺丰国际订单信息生成 DP 发货回填模板。
+3. 云途面单按 SKU 分拣并生成供应商 ZIP；顺丰合并面单按寄方姓名拆成供应商 PDF。
+
+顺丰国际当前三步均已接入：批量上传、运单号回填 DP、合并面单按寄方姓名拆分。
 
 ## 当前状态
 
@@ -22,8 +24,10 @@ DropShipZone 澳大利亚订单到云途发货的本地桌面工具，同时维�
 app.py
 ../../shared/fulfillment/
   generate_yunexpress_template.py
+  generate_sf_international_template.py
   generate_dp_shipment_upload.py
   sort_yunexpress_labels_by_sku.py
+  split_sf_labels_by_sender.py
 ../../docs/
 ../macos/
 ../../web/
@@ -62,5 +66,14 @@ python app.py
 - 申报币种：`USD`
 - DP 承运商：`YunExpress`
 
-任何字段映射或匹配规则修改，都必须用同一批脱敏数据在 Windows 和 macOS 进行字段级对比。
+顺丰国际参数：
 
+- 业务类型：从模板提供的 16 个渠道中明确选择。
+- 是否带电：每批选择“否”或“是”。
+- 国家：`AU`
+- 申报币种：`USD/美元`
+- DP 承运商：`SF INTERNATIONAL`
+- DP `Order ID`：顺丰导出的“客户订单号”
+- DP `Tracking Number`：顺丰导出的“顺丰运单号”
+
+任何字段映射或匹配规则修改，都必须用同一批脱敏数据在 Windows 和 macOS 进行字段级对比。
