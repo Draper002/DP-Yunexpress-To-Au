@@ -44,6 +44,8 @@ class WebPlatformTests(unittest.TestCase):
         self.assertIn("顺丰国际订单数据", response.text)
         self.assertIn("顺丰国际面单 PDF", response.text)
         self.assertIn("SF INTERNATIONAL", response.text)
+        self.assertIn('name="merge_same_recipient_sku"', response.text)
+        self.assertIn("合并相同收件人 + 相同 SKU", response.text)
         self.assertIn("getTimezoneOffset", response.text)
 
     def test_config_update_is_all_or_nothing(self):
@@ -156,6 +158,7 @@ class WebPlatformTests(unittest.TestCase):
         response = self.client.get("/healthz")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["platforms"], ["yunexpress", "sf"])
+        self.assertIn("same_recipient_same_sku_merge", response.json()["features"])
 
     def test_employee_cannot_download_another_users_result(self):
         owner_email = "owner@test.local"

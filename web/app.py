@@ -12,6 +12,7 @@ import sqlite3
 import sys
 import threading
 import time
+import zipfile
 from contextlib import asynccontextmanager, closing, redirect_stderr, redirect_stdout
 from datetime import datetime
 from pathlib import Path
@@ -37,6 +38,7 @@ sys.path.insert(0, str(TOOL_ROOT))
 import generate_dp_shipment_upload
 import generate_sf_international_template
 import generate_yunexpress_template
+import order_consolidation
 import sort_yunexpress_labels_by_sku
 import split_sf_labels_by_sender
 
@@ -252,6 +254,30 @@ def result_from(output: str) -> Path:
     return Path(paths[-1])
 
 
+def tagged_path(output: str, tag: str) -> Path | None:
+    prefix = f"{tag}:"
+    paths = [
+        line[len(prefix):].strip().strip('"')
+        for line in output.splitlines()
+        if line.startswith(prefix)
+    ]
+    if not paths:
+        return None
+    path = Path(paths[-1])
+    return path if path.exists() else None
+
+
+def bundle_files(primary: Path, extras: list[Path], label: str) -> Path:
+    output = primary.parent / f"{primary.stem}_{label}.zip"
+    if output.exists():
+        output = primary.parent / f"{primary.stem}_{label}_{datetime.now().strftime('%H%M%S')}.zip"
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.write(primary, arcname=primary.name)
+        for extra in extras:
+            archive.write(extra, arcname=extra.name)
+    return output
+
+
 def batch_dir(user_id: int, platform: str) -> Path:
     path = WORKING / str(user_id) / normalize_platform(platform)
     path.mkdir(parents=True, exist_ok=True)
@@ -283,6 +309,13 @@ def sf_options() -> str:
     <label>业务类型<select name="business_type"><option value="">请选择业务类型</option>{business_options}</select></label>
     <div><b>是否带电</b><div class="mini-segment">{battery_options}</div></div>
     </div>'''
+
+
+def consolidation_option() -> str:
+    return '''<label class="merge-option">
+    <input type="checkbox" name="merge_same_recipient_sku" value="1" checked>
+    <span><b>合并相同收件人 + 相同 SKU</b><small>生成后先检查订单合并关系表，再上传快递平台</small></span>
+    </label>'''
 
 
 def page(title: str, content: str, user=None) -> str:
@@ -340,7 +373,7 @@ def home(request: Request):
     content = f'''<section class="hero"><div><p class="eyebrow">AU FULFILLMENT DESK</p><h1>发货工作台</h1><p class="lead">选择云途或顺丰国际，按顺序完成寄件模板、DP 运单号回填和供应商面单整理。</p></div><div class="identity"><i></i><div><b>{html.escape(user["email"])}</b><small>{"管理员" if user["role"] == "admin" else "员工"} · 在线</small></div></div></section>
     <section class="config"><div><small>固定配置</small><b>{"全部就绪" if config_ready else "需要检查"}</b><em>SKU 商品库、两家承运商模板与 DP 发货模板，仅更新时维护</em></div><a class="button soft" href="/config">管理配置</a></section>
     <section class="steps">
-      <article data-platform="yunexpress"><div class="step-head"><div class="no">01</div><span>寄件导入</span></div><h2><span class="yun-only">生成云途模板</span><span class="sf-only">生成顺丰模板</span></h2><p><span class="yun-only">DP 订单转换为云途批量寄件 Excel。</span><span class="sf-only">DP 订单转换为顺丰国际批量导入工作簿。</span></p><form class="workflow-form" data-platform="yunexpress" action="/step/1" method="post" enctype="multipart/form-data">{platform_selector()}{field("file","本次 DP 订单 CSV",".csv")}{sf_options()}<div class="row"><input name="date" type="date" value="{today}" required><button class="primary" type="submit">开始生成</button></div></form></article>
+      <article data-platform="yunexpress"><div class="step-head"><div class="no">01</div><span>寄件导入</span></div><h2><span class="yun-only">生成云途模板</span><span class="sf-only">生成顺丰模板</span></h2><p><span class="yun-only">DP 订单转换为云途批量寄件 Excel。</span><span class="sf-only">DP 订单转换为顺丰国际批量导入工作簿。</span></p><form class="workflow-form" data-platform="yunexpress" action="/step/1" method="post" enctype="multipart/form-data">{platform_selector()}{field("file","本次 DP 订单 CSV",".csv")}{sf_options()}{consolidation_option()}<div class="row"><input name="date" type="date" value="{today}" required><button class="primary" type="submit">开始生成</button></div></form></article>
       <article data-platform="yunexpress"><div class="step-head"><div class="no">02</div><span>DP 回填</span></div><h2>生成 DP 回填模板</h2><p><span class="yun-only">上传云途订单信息 Excel，批量回填运单号。</span><span class="sf-only">上传顺丰订单数据，承运商自动填写 SF INTERNATIONAL。</span></p><form class="workflow-form" data-platform="yunexpress" action="/step/2" method="post" enctype="multipart/form-data">{platform_selector()}<label class="file"><b><span class="yun-only">本次云途订单信息 Excel</span><span class="sf-only">本次顺丰国际订单数据</span></b><input name="file" type="file" accept=".xls,.xlsx" required><span>选择文件</span></label><div class="row"><input name="date" type="date" value="{today}" required><button class="primary" type="submit">开始生成</button></div></form></article>
       <article data-platform="yunexpress"><div class="step-head"><div class="no">03</div><span>面单整理</span></div><h2><span class="yun-only">按 SKU 分拣</span><span class="sf-only">按寄方姓名拆分</span></h2><p><span class="yun-only">上传云途面单 ZIP，生成按 SKU 分组的供应商包。</span><span class="sf-only">上传顺丰面单 PDF，自动核对第 2 步运单后按寄方拆分。</span></p><form class="workflow-form" data-platform="yunexpress" action="/step/3" method="post" enctype="multipart/form-data">{platform_selector()}<label class="file"><b><span class="yun-only">本次云途面单 ZIP</span><span class="sf-only">本次顺丰国际面单 PDF</span></b><input name="file" type="file" accept=".zip,.pdf" required><span>选择文件</span></label><div class="row"><input name="date" type="date" value="{today}" required><button class="primary" type="submit">开始整理</button></div></form></article>
     </section><section class="history"><div class="section-head"><div><p class="eyebrow">ACTIVITY</p><h2>我的最近处理记录</h2></div><span>每个账号仅显示自己的批次</span></div><div class="table-wrap"><table><thead><tr><th>时间</th><th>步骤</th><th>状态</th><th>日期</th><th>结果</th></tr></thead><tbody>{records}</tbody></table></div></section>'''
@@ -444,6 +477,7 @@ def execute_workflow(
     platform: str,
     business_type: str,
     battery: str,
+    merge_same_recipient_sku: bool = True,
 ) -> tuple[Path, Path | None]:
     batch = batch_dir(user_id, platform)
     output = RESULTS / str(user_id) / date.replace("-", "") / platform
@@ -461,6 +495,11 @@ def execute_workflow(
                     "--yunexpress-template-xlsx", str(config_path("yun_template")),
                     "--date", date,
                     "--output-root", str(output),
+                    (
+                        "--merge-same-recipient-sku"
+                        if merge_same_recipient_sku
+                        else "--no-merge-same-recipient-sku"
+                    ),
                 ],
             )
         else:
@@ -478,6 +517,11 @@ def execute_workflow(
                     "--battery", battery,
                     "--date", date,
                     "--output-root", str(output),
+                    (
+                        "--merge-same-recipient-sku"
+                        if merge_same_recipient_sku
+                        else "--no-merge-same-recipient-sku"
+                    ),
                 ],
             )
     elif step == 2:
@@ -490,60 +534,95 @@ def execute_workflow(
         else:
             commit_target = batch / f"sf_orders{source.suffix.lower()}"
             source_args = ["--sf-international-file", str(source)]
+        workflow_args = source_args + [
+            "--dp-orders-csv", str(dp_orders),
+            "--shipment-template-xlsx", str(config_path("dp_template")),
+            "--date", date,
+            "--output-root", str(output),
+        ]
+        merge_map = batch / "merge_map.json"
+        if merge_map.exists():
+            workflow_args += ["--merge-map", str(merge_map)]
         code, out, err = script(
             generate_dp_shipment_upload,
-            source_args
-            + [
-                "--dp-orders-csv", str(dp_orders),
-                "--shipment-template-xlsx", str(config_path("dp_template")),
-                "--date", date,
-                "--output-root", str(output),
-            ],
+            workflow_args,
         )
     elif platform == "yunexpress":
         dp_orders = batch / "dp_orders.csv"
         yun_orders = batch / "yun_orders.xlsx"
         if not dp_orders.exists() or not yun_orders.exists():
             raise ValueError("云途面单分拣需要先在同一账号完成第 1、2 步")
+        workflow_args = [
+            "--zip", str(source),
+            "--yunexpress-xlsx", str(yun_orders),
+            "--dp-orders-csv", str(dp_orders),
+            "--sku-xlsx", str(config_path("sku")),
+            "--date", date,
+            "--output-root", str(output),
+        ]
+        merge_map = batch / "merge_map.json"
+        if merge_map.exists():
+            workflow_args += ["--merge-map", str(merge_map)]
         code, out, err = script(
             sort_yunexpress_labels_by_sku,
-            [
-                "--zip", str(source),
-                "--yunexpress-xlsx", str(yun_orders),
-                "--dp-orders-csv", str(dp_orders),
-                "--sku-xlsx", str(config_path("sku")),
-                "--date", date,
-                "--output-root", str(output),
-            ],
+            workflow_args,
         )
     else:
         sf_order_files = list(batch.glob("sf_orders.xls*"))
         if len(sf_order_files) != 1:
             raise ValueError("顺丰面单拆分需要先在同一账号完成第 2 步")
+        workflow_args = [
+            "--pdf", str(source),
+            "--sf-international-file", str(sf_order_files[0]),
+            "--date", date,
+            "--output-root", str(output),
+        ]
+        merge_map = batch / "merge_map.json"
+        dp_orders = batch / "dp_orders.csv"
+        if merge_map.exists():
+            workflow_args += [
+                "--merge-map", str(merge_map),
+                "--dp-orders-csv", str(dp_orders),
+            ]
         code, out, err = script(
             split_sf_labels_by_sender,
-            [
-                "--pdf", str(source),
-                "--sf-international-file", str(sf_order_files[0]),
-                "--date", date,
-                "--output-root", str(output),
-            ],
+            workflow_args,
         )
 
     if code != 0:
         raise ValueError(err.strip() or out.strip() or "处理失败")
-    if commit_target:
+    result = result_from(out)
+    merge_map_result = tagged_path(out, "MERGE_MAP")
+    merge_report_result = tagged_path(out, "MERGE_REPORT")
+    tracking_map_result = tagged_path(out, "TRACKING_MAP")
+
+    consolidation_plan: dict[str, object] | None = None
+    if step == 1:
+        if not merge_map_result or not merge_report_result:
+            raise ValueError("处理脚本没有生成订单合并关系文件")
+        consolidation_plan = order_consolidation.load_plan(
+            merge_map_result,
+            source_csv=source,
+            expected_platform=platform,
+            expected_date=date,
+        )
+        staged_map = batch / ".merge_map.json.new"
+        shutil.copy2(merge_map_result, staged_map)
+        source.replace(batch / "dp_orders.csv")
+        staged_map.replace(batch / "merge_map.json")
+        (batch / "yun_orders.xlsx").unlink(missing_ok=True)
+        for old in batch.glob("sf_orders.xls*"):
+            old.unlink(missing_ok=True)
+    elif commit_target:
         if platform == "sf" and step == 2:
             for old in batch.glob("sf_orders.xls*"):
                 if old != commit_target:
                     old.unlink(missing_ok=True)
         source.replace(commit_target)
-    result = result_from(out)
+
     report = result.with_suffix(".report.json") if result.is_file() else result / "校验成功报告.json"
-    package = (
-        result
-        if result.is_file()
-        else Path(
+    if result.is_dir():
+        package = Path(
             shutil.make_archive(
                 str(result),
                 "zip",
@@ -551,7 +630,17 @@ def execute_workflow(
                 base_dir=result.name,
             )
         )
-    )
+    elif (
+        step == 1
+        and consolidation_plan
+        and int(consolidation_plan["merged_group_count"]) > 0
+        and merge_report_result
+    ):
+        package = bundle_files(result, [merge_report_result], "含合并关系")
+    elif step == 2 and tracking_map_result:
+        package = bundle_files(result, [tracking_map_result], "含合并运单对应表")
+    else:
+        package = result
     if step == 3:
         shutil.rmtree(batch, ignore_errors=True)
     return package, report if report.exists() else None
@@ -565,6 +654,7 @@ async def process(
     platform: str,
     business_type: str = "",
     battery: str = "否",
+    merge_same_recipient_sku: bool = True,
 ):
     user = user_for(request)
     if not user:
@@ -598,6 +688,7 @@ async def process(
                 platform,
                 business_type,
                 battery,
+                merge_same_recipient_sku,
             )
         step_name = f"步骤 {step} · {PLATFORM_LABELS[platform]}"
         add_run(user["id"], step_name, date, "SUCCESS", package, report)
@@ -617,9 +708,20 @@ async def step1(
     platform: str = Form(...),
     business_type: str = Form(""),
     battery: str = Form("否"),
+    merge_same_recipient_sku: str = Form("0"),
     file: UploadFile = File(...),
 ):
-    return await process(request, 1, date, file, platform, business_type, battery)
+    merge_enabled = merge_same_recipient_sku.strip().lower() in {"1", "true", "on", "yes"}
+    return await process(
+        request,
+        1,
+        date,
+        file,
+        platform,
+        business_type,
+        battery,
+        merge_enabled,
+    )
 
 @app.post("/step/2")
 async def step2(request: Request, date: str = Form(...), platform: str = Form(...), file: UploadFile = File(...)):
@@ -632,7 +734,11 @@ async def step3(request: Request, date: str = Form(...), platform: str = Form(..
 
 @app.get("/healthz")
 def healthz():
-    return {"status": "ok", "platforms": list(PLATFORM_LABELS)}
+    return {
+        "status": "ok",
+        "platforms": list(PLATFORM_LABELS),
+        "features": ["same_recipient_same_sku_merge"],
+    }
 
 @app.get("/download/{run_id}")
 def download(request: Request, run_id: int):
@@ -652,6 +758,15 @@ def download(request: Request, run_id: int):
 
 CSS = r'''
 :root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Microsoft YaHei UI",sans-serif;color:#18202a;background:#eef1f5;letter-spacing:0}*{box-sizing:border-box;letter-spacing:0}body{margin:0;min-height:100vh;background:#eef1f5}a{text-decoration:none;color:inherit}header{height:66px;padding:0 max(24px,4vw);display:flex;align-items:center;justify-content:space-between;background:rgba(250,251,253,.86);border-bottom:1px solid rgba(64,73,88,.16);backdrop-filter:blur(20px);position:sticky;top:0;z-index:3}.brand{font-size:18px;font-weight:760}.brand small{font-size:9px;color:#788291;margin-left:8px}nav{display:flex;gap:22px;color:#667181;font-size:13px;font-weight:650}nav a:hover{color:#0071e3}main{width:min(1200px,calc(100% - 32px));margin:auto;padding:34px 0 64px}.hero{display:flex;justify-content:space-between;align-items:end;gap:28px;margin-bottom:24px}.eyebrow{font-size:10px;color:#727d8d;font-weight:750;margin:0 0 9px}.hero h1,.head h1{font-size:34px;line-height:1.08;margin:0 0 11px}.lead{color:#626d7c;line-height:1.65;max-width:710px;margin:0;font-size:14px}.identity{display:flex;gap:10px;align-items:center;background:rgba(255,255,255,.72);padding:10px 13px;border:1px solid rgba(67,77,92,.15);border-radius:8px}.identity i{width:8px;height:8px;border-radius:50%;background:#23a566;box-shadow:0 0 0 3px #d8f2e4}.identity b,.identity small{display:block}.identity b{font-size:12px}.identity small{font-size:11px;color:#778293;margin-top:3px}.config{display:flex;align-items:center;justify-content:space-between;padding:15px 17px;background:rgba(255,255,255,.74);border:1px solid rgba(64,74,89,.14);border-radius:8px;margin-bottom:14px}.config small{color:#737e8d;margin-right:12px}.config b{font-size:14px}.config em{display:block;color:#7a8595;font-size:11px;font-style:normal;margin-top:4px}.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.steps article,.panel,.history{background:rgba(255,255,255,.78);border:1px solid rgba(64,74,89,.14);border-radius:8px;padding:18px;box-shadow:0 10px 28px rgba(41,50,66,.06)}.step-head{height:25px;display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}.step-head>span{font-size:10px;color:#7a8492;font-weight:700}.no{width:25px;height:25px;display:grid;place-items:center;border-radius:7px;background:#e5f1ff;color:#006edb;font-weight:800;font-size:11px}.steps h2,.panel h2,.history h2{font-size:17px;margin:0 0 7px}.steps>article>p{height:42px;color:#6e7887;font-size:12px;line-height:1.55;margin:0 0 13px}.workflow-form{display:grid;gap:10px}.platform-picker,.mini-segment{display:grid;grid-template-columns:1fr 1fr;background:#e9edf2;border:1px solid #dce1e7;border-radius:8px;padding:3px;gap:3px}.platform-picker label,.mini-segment label{cursor:pointer}.platform-picker input,.mini-segment input{position:absolute;opacity:0;pointer-events:none}.platform-picker span,.mini-segment span{height:30px;display:grid;place-items:center;border-radius:6px;color:#667181;font-size:11px;font-weight:700}.platform-picker input:checked+span,.mini-segment input:checked+span{background:#fff;color:#086dcc;box-shadow:0 1px 4px rgba(37,45,59,.14)}article[data-platform="yunexpress"] .sf-only{display:none}article[data-platform="sf"] .yun-only{display:none}.file{display:block;border:1px dashed #b8c2cf;border-radius:8px;padding:11px 12px;background:#f8fafc;cursor:pointer;overflow:hidden}.file:hover{border-color:#7ca9d7;background:#f4f8fc}.file b{display:block;font-size:12px;margin-bottom:7px}.file>span:last-child{display:block;color:#738092;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.file input{display:none}.sf-options{border:1px solid #dce2e9;background:#f7f9fb;border-radius:8px;padding:10px;gap:9px}.sf-options>label{display:grid;gap:6px;color:#687486;font-size:11px;font-weight:700}.sf-options select{width:100%}.sf-options>div{display:grid;grid-template-columns:auto 120px;align-items:center;gap:10px}.sf-options>div>b{font-size:11px;color:#687486}.mini-segment span{height:27px}.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.row input,input,select{min-width:0;border:1px solid #cdd4dd;background:#fff;border-radius:7px;padding:9px 10px;color:#202a36;font:inherit;font-size:12px}.row input:focus,input:focus,select:focus{outline:2px solid rgba(0,113,227,.2);border-color:#4795dc}.primary,.button{border:0;border-radius:7px;padding:9px 13px;font:inherit;font-weight:720;font-size:12px;cursor:pointer;display:inline-grid;place-items:center}.primary{background:#0878df;color:#fff}.primary:hover{background:#006dcc}.soft{background:#e8f2fc;color:#1267b5}.history{margin-top:14px}.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:10px}.section-head>span{color:#7d8794;font-size:11px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;color:#7d8794;font-size:10px}th,td{padding:11px 8px;border-bottom:1px solid #e3e7ec}td{color:#455164}.status{font-size:10px;font-weight:800;padding:4px 7px;border-radius:6px}.status.success{background:#e3f5eb;color:#237a50}.status.failed{background:#fce9e8;color:#ad4844}td a{color:#0876da;font-weight:700}.empty{text-align:center;color:#87919f;padding:26px}.head{margin-bottom:22px}.two{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}.panel form{display:grid;gap:12px}.panel label,.login label{display:grid;gap:7px;color:#637083;font-size:12px;font-weight:700}.panel input,.login input{width:100%}.quiet{background:rgba(247,249,252,.86)}.quiet ul{padding:0;margin:10px 0 22px;list-style:none;display:grid;gap:14px}.quiet li{display:flex;gap:10px;align-items:center}.quiet li i{width:7px;height:7px;border-radius:50%;background:#0878df}.quiet li b,.quiet li small{display:block}.quiet li b{font-size:13px}.quiet li small,.hint{font-size:11px;color:#788494}.hint{line-height:1.55;margin:0}.notice{padding:14px;background:#f1f4f8;border:1px solid #dce2e9;border-radius:8px;color:#667385;font-size:12px;line-height:1.6}.login{max-width:410px;margin:7vh auto 0;background:rgba(255,255,255,.82);padding:30px;border:1px solid rgba(64,74,89,.14);border-radius:8px;box-shadow:0 18px 44px rgba(41,50,66,.09)}.mark{font-size:23px;font-weight:800;margin-bottom:30px}.mark span{color:#0878df}.login h1{font-size:27px;margin:0 0 10px}.login form{display:grid;gap:13px;margin-top:22px}@media(max-width:980px){.steps{grid-template-columns:1fr}.steps>article>p{height:auto;min-height:0}.two{grid-template-columns:1fr}}@media(max-width:620px){header{height:auto;min-height:62px;padding:13px 16px;align-items:flex-start;gap:12px}.brand small{display:none}nav{gap:12px;flex-wrap:wrap;justify-content:flex-end}main{width:min(100% - 20px,1200px);padding-top:22px}.hero{align-items:start;flex-direction:column}.hero h1,.head h1{font-size:29px}.identity{width:100%}.config{align-items:flex-start;gap:12px}.row{grid-template-columns:1fr}.row .primary{width:100%}.section-head{align-items:start;gap:10px;flex-direction:column}}
+'''
+
+CSS += r'''
+.merge-option{display:flex;gap:9px;align-items:center;border:1px solid #d9e4ef;background:#f4f8fc;padding:9px 10px;border-radius:8px;cursor:pointer}
+.merge-option input{width:15px;height:15px;min-width:15px;accent-color:#0878df}
+.merge-option span{min-width:0}
+.merge-option b,.merge-option small{display:block}
+.merge-option b{font-size:11px;color:#334154}
+.merge-option small{font-size:10px;color:#778394;margin-top:3px;line-height:1.45;white-space:normal}
 '''
 
 SCRIPT = r'''

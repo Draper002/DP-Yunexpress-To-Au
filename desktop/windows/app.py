@@ -24,6 +24,7 @@ if str(SHARED_ROOT) not in sys.path:
 import generate_dp_shipment_upload
 import generate_sf_international_template
 import generate_yunexpress_template
+import order_consolidation
 import sort_yunexpress_labels_by_sku
 import split_sf_labels_by_sender
 
@@ -154,6 +155,7 @@ class App:
             "shipping_platform": tk.StringVar(value="yunexpress"),
             "sf_business_type": tk.StringVar(value="请选择业务类型"),
             "sf_battery": tk.StringVar(value="否"),
+            "merge_same_recipient_sku": tk.BooleanVar(value=True),
         }
         self.output_dir = tk.StringVar(value=str(date_folder(today)))
         self.status_text = tk.StringVar(value="就绪")
@@ -164,6 +166,7 @@ class App:
         self.action_buttons: list[tk.Button] = []
         self.result_buttons: list[tk.Button] = []
         self.platform_buttons: dict[str, tk.Button] = {}
+        self.merge_map_paths: dict[str, Path] = {}
 
         self.config_files = [
             ("SKU商品库", "sku", [("Excel", "*.xlsx")]),
@@ -569,8 +572,12 @@ class App:
         for row, (label, key, filetypes) in enumerate(step["files"], start=1):
             self.file_field(body, row, label, key, filetypes)
 
+        next_row = len(step["files"]) + 1
         if self.current_step == 0 and self.vars["shipping_platform"].get() == "sf":
-            self.sf_options_field(body, len(step["files"]) + 1)
+            self.sf_options_field(body, next_row)
+            next_row += 1
+        if self.current_step == 0:
+            self.merge_option_field(body, next_row)
 
         action = tk.Frame(
             self.step_panel,
@@ -692,6 +699,31 @@ class App:
             font=("Microsoft YaHei UI", 9),
         )
         battery.grid(row=0, column=3, sticky="e")
+
+    def merge_option_field(self, parent, row):
+        field = tk.Frame(parent, bg=self.COLORS["soft"])
+        field.grid(row=row, column=0, sticky="ew", pady=(5, 0))
+        checkbox = tk.Checkbutton(
+            field,
+            variable=self.vars["merge_same_recipient_sku"],
+            text="合并相同收件人且相同 SKU 的订单",
+            bg=self.COLORS["soft"],
+            fg=self.COLORS["ink"],
+            activebackground=self.COLORS["soft"],
+            activeforeground=self.COLORS["ink"],
+            selectcolor="#ffffff",
+            relief="flat",
+            bd=0,
+            highlightthickness=0,
+            cursor="hand2",
+            font=("Microsoft YaHei UI", 9, "bold"),
+        )
+        checkbox.pack(side="left")
+        self.info_dot(
+            field,
+            "仅在收件人姓名、街道、城市、州、邮编、电话和 SKU 全部一致时合并。生成后请先检查“订单合并关系”Excel，再上传快递平台。",
+            bg=self.COLORS["soft"],
+        ).pack(side="left", padx=(5, 0))
 
     def file_field(self, parent, row, label, key, filetypes):
         field = tk.Frame(parent, bg=self.COLORS["soft"])
@@ -922,6 +954,88 @@ class App:
             return result_path
         return result_path.parent
 
+    @staticmethod
+    def extract_tagged_path(output: str, tag: str) -> Path | None:
+        matches = re.findall(rf"^{re.escape(tag)}:\s*(.+?)\s*$", output, flags=re.MULTILINE)
+        if not matches:
+            return None
+        return Path(matches[-1].strip().strip('"'))
+
+    def remember_merge_map(self, output: str):
+        merge_map = self.extract_tagged_path(output, "MERGE_MAP")
+        if not merge_map or not merge_map.is_file():
+            return
+        try:
+            plan = order_consolidation.load_plan(merge_map)
+        except Exception as exc:
+            self.write(f"警告：无法读取本批合并关系：{exc}")
+            return
+        self.merge_map_paths[str(plan["platform"])] = merge_map
+
+    def resolve_merge_map(self, platform: str) -> Path | None:
+        dp_orders = Path(self.vars["dp_orders"].get())
+        if not dp_orders.is_file():
+            return None
+        current = self.merge_map_paths.get(platform)
+        if current and current.is_file():
+            try:
+                order_consolidation.load_plan(
+                    current,
+                    dp_orders,
+                    platform,
+                    self.vars["date"].get(),
+                )
+                return current
+            except Exception:
+                pass
+        output_root = Path(self.output_dir.get())
+        if not output_root.exists():
+            return None
+        candidates = sorted(
+            output_root.rglob("订单合并关系_*.json"),
+            key=lambda path: path.stat().st_mtime,
+            reverse=True,
+        )
+        for candidate in candidates:
+            try:
+                order_consolidation.load_plan(
+                    candidate,
+                    dp_orders,
+                    platform,
+                    self.vars["date"].get(),
+                )
+            except Exception:
+                continue
+            self.merge_map_paths[platform] = candidate
+            return candidate
+        return None
+
+    def confirm_consolidation(self) -> bool:
+        if not self.vars["merge_same_recipient_sku"].get():
+            return True
+        try:
+            orders, _counts = generate_yunexpress_template.read_dp_orders(
+                Path(self.vars["dp_orders"].get()),
+                generate_yunexpress_template.DEFAULT_STATUS,
+            )
+            summary = order_consolidation.candidate_summary(orders)
+        except Exception as exc:
+            messagebox.showerror("无法检查合并候选", str(exc))
+            return False
+        if summary["merged_group_count"] == 0:
+            return True
+        decision = messagebox.askyesnocancel(
+            "确认订单合并",
+            f"检测到 {summary['merged_group_count']} 组合并候选，涉及 {summary['merged_order_count']} 个订单，"
+            f"预计减少 {summary['saved_parcel_count']} 个包裹。\n\n"
+            "选择“是”按相同收件人和相同 SKU 合并；选择“否”仍按一单一包裹生成；选择“取消”停止。",
+            default=messagebox.YES,
+        )
+        if decision is None:
+            return False
+        self.vars["merge_same_recipient_sku"].set(bool(decision))
+        return True
+
     def remember_result_dir(self, result_dir: Path | None):
         self.last_result_dir = result_dir
         self.update_result_buttons()
@@ -1005,6 +1119,7 @@ class App:
                 self.write(stderr.strip())
             if returncode == 0:
                 self.write("结果：成功")
+                self.remember_merge_map(stdout)
                 result_dir = self.extract_result_dir(stdout)
                 self.root.after(0, lambda: self.remember_result_dir(result_dir))
                 if result_dir:
@@ -1027,6 +1142,13 @@ class App:
         if business_type not in generate_sf_international_template.SF_BUSINESS_TYPES:
             messagebox.showerror("请选择业务类型", "请先选择本批顺丰国际订单使用的业务类型。")
             return
+        if not self.confirm_consolidation():
+            return
+        merge_arg = (
+            "--merge-same-recipient-sku"
+            if self.vars["merge_same_recipient_sku"].get()
+            else "--no-merge-same-recipient-sku"
+        )
         self.run_cmd(
             "第1步 生成顺丰国际上传模板",
             self.base_cmd("generate_sf_international_template.py")
@@ -1041,12 +1163,20 @@ class App:
                 business_type,
                 "--battery",
                 self.vars["sf_battery"].get(),
+                merge_arg,
             ],
         )
 
     def run_yun(self):
         if not self.require_files(["dp_orders", "sku", "yun_template"]):
             return
+        if not self.confirm_consolidation():
+            return
+        merge_arg = (
+            "--merge-same-recipient-sku"
+            if self.vars["merge_same_recipient_sku"].get()
+            else "--no-merge-same-recipient-sku"
+        )
         self.run_cmd(
             "第1步 生成云途上传模板",
             self.base_cmd("generate_yunexpress_template.py")
@@ -1057,6 +1187,7 @@ class App:
                 self.vars["sku"].get(),
                 "--yunexpress-template-xlsx",
                 self.vars["yun_template"].get(),
+                merge_arg,
             ],
         )
 
@@ -1077,6 +1208,8 @@ class App:
             if platform == "sf"
             else ["--yunexpress-xlsx", self.vars["yun_orders"].get()]
         )
+        merge_map = self.resolve_merge_map(platform)
+        merge_args = ["--merge-map", str(merge_map)] if merge_map else []
         title = "第2步 生成顺丰 DP 回填模板" if platform == "sf" else "第2步 生成云途 DP 回填模板"
         self.run_cmd(
             title,
@@ -1087,7 +1220,8 @@ class App:
                 str(dp_orders),
                 "--shipment-template-xlsx",
                 self.vars["dp_template"].get(),
-            ],
+            ]
+            + merge_args,
         )
 
     def run_labels(self):
@@ -1101,6 +1235,17 @@ class App:
                     "为防止漏单或混入其他批次面单，请先完成第2步。第3步会自动复用顺丰订单数据，无需再次选择。",
                 )
                 return
+            merge_map = self.resolve_merge_map("sf")
+            merge_args = (
+                [
+                    "--merge-map",
+                    str(merge_map),
+                    "--dp-orders-csv",
+                    self.vars["dp_orders"].get(),
+                ]
+                if merge_map
+                else []
+            )
             self.run_cmd(
                 "第3步 按寄方姓名拆分顺丰面单",
                 self.base_cmd("split_sf_labels_by_sender.py")
@@ -1109,11 +1254,14 @@ class App:
                     self.vars["sf_label_pdf"].get(),
                     "--sf-international-file",
                     str(sf_orders),
-                ],
+                ]
+                + merge_args,
             )
             return
         if not self.require_files(["label_zip", "yun_orders", "dp_orders", "sku"]):
             return
+        merge_map = self.resolve_merge_map("yunexpress")
+        merge_args = ["--merge-map", str(merge_map)] if merge_map else []
         self.run_cmd(
             "第3步 按 SKU 分拣面单",
             self.base_cmd("sort_yunexpress_labels_by_sku.py")
@@ -1126,7 +1274,8 @@ class App:
                 self.vars["dp_orders"].get(),
                 "--sku-xlsx",
                 self.vars["sku"].get(),
-            ],
+            ]
+            + merge_args,
         )
 
 

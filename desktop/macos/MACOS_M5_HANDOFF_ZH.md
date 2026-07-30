@@ -1,6 +1,6 @@
 # DP International Fulfillment To Au - MacBook M5 / macOS 26 开发交接文档
 
-更新时间：`2026-07-26 21:10 CST (Asia/Shanghai)`
+更新时间：`2026-07-30 21:35 CST (Asia/Shanghai)`
 
 当前仓库已经提供 `desktop/macos/app.py`、Apple Silicon 打包配置和构建脚本。Mac 端下一位 Codex 不需要重新移植业务代码，重点是在 M5 实机完成运行、界面、输出一致性和 `.app` 构建验证。
 
@@ -28,6 +28,7 @@ shared/fulfillment/
 ├── generate_yunexpress_template.py
 ├── generate_sf_international_template.py
 ├── generate_dp_shipment_upload.py
+├── order_consolidation.py
 ├── sort_yunexpress_labels_by_sku.py
 └── split_sf_labels_by_sender.py
 web/app.py
@@ -56,6 +57,8 @@ Windows 生成的 *.spec
 - 云途申报币种固定为 `USD`；顺丰为 `USD/美元`。
 - 订单状态筛选规则保持现有脚本实现，不擅自修改字段映射。
 - 输出对应物流平台的批量寄件 Excel。
+- 默认可合并“收件人姓名、街道、城市、州、邮编、电话标准化后一致，且 SKU 完全一致”的订单；生成前必须让用户确认候选数量。
+- 合并件使用 `MYYMMDDNNN` 承运商客户单号，同时输出订单合并关系 Excel 和机器校验 JSON。
 
 ### 第 2 步：生成 DP 发货回填模板
 
@@ -64,6 +67,7 @@ Windows 生成的 *.spec
 - 云途承运商为 `YunExpress`；顺丰承运商为 `SF INTERNATIONAL`。
 - 顺丰“客户订单号”映射 DP `Order ID`，“顺丰运单号”映射 `Tracking Number`。
 - 运单号必须按订单正确回填，不允许仅按表格行号匹配。
+- 合单计划存在时，一个承运商包裹展开为组内全部原始 DP 订单，这些订单使用同一运单号；计划之外的重复运单号仍必须拒绝。
 
 ### 第 3 步：按 SKU 分拣云途面单
 
@@ -76,6 +80,7 @@ Windows 生成的 *.spec
 - 单个 SKU 文件夹内不要放发货明细表。
 - 总目录可以保留汇总表和校验报告。
 - 任何未匹配、重复匹配、缺少 PDF 或数量不一致都必须明确报错或写入校验报告，不能静默忽略。
+- 合并件面单不得再次进入普通 SKU 文件夹；必须放入独立“合并件”目录，并附 `合并订单说明.xlsx` 与供应商 ZIP。
 
 顺丰国际模式：
 
@@ -83,6 +88,7 @@ Windows 生成的 *.spec
 - 先要求 PDF 运单号与第 2 步顺丰订单运单号集合完全一致，再按每页面单中的“寄方姓名”分组；不依赖 SKU 商品库。
 - 每个寄方输出一个合并 PDF，文件名包含日期、寄方姓名和面单数量。
 - 每页必须存在一个寄方姓名和一个唯一顺丰运单号；缺失或重复时停止输出。
+- 合并件面单从普通寄方 PDF 中移除，单独输出一张面单、供应商说明和 ZIP，防止同一面单被发送两次。
 
 ## 4. 输出目录规则
 
@@ -272,11 +278,14 @@ hdiutil create \
 ### 功能测试
 
 - 第 1 步分别成功生成云途上传 Excel 和顺丰国际上传 XLSM。
+- 使用两笔相同收件人、相同 SKU 的脱敏订单验证只生成一个承运商包裹；使用相同收件人、不同 SKU 验证不会合并。
 - 云途及顺丰后台能够成功接受对应文件。
 - 第 2 步分别从云途订单信息和顺丰 `.xls/.xlsx` 生成可由 DP 接受的回填模板。
 - 顺丰 DP 回填的承运商必须为 `SF INTERNATIONAL`。
+- 合并组内多个 DP 订单必须回填同一运单号，普通订单仍保持一单一运单。
 - 第 3 步能够从云途总面单 ZIP 正确分拣 PDF。
 - 第 3 步能够从顺丰合并面单 PDF 按寄方姓名生成供应商 PDF。
+- 云途和顺丰的合并件均只出现在“合并件”目录，且供应商 ZIP 内包含一张面单和合并订单说明。
 - 每个 SKU 文件夹内 PDF 数量与文件夹名称中的数量一致。
 - 每个供应商 ZIP 内文件数量、名称与同目录 PDF 完全一致。
 - 打开输出目录、打开结果目录在 macOS 上有效。

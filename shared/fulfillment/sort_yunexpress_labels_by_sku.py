@@ -26,6 +26,8 @@ from typing import Iterable
 
 import openpyxl
 
+import order_consolidation
+
 
 WAYBILL_RE = re.compile(r"(YT[A-Za-z0-9]+)", re.IGNORECASE)
 DEFAULT_DP_STATUS = "processing"
@@ -202,6 +204,7 @@ def validate(
     shipments: dict[str, Shipment],
     order_to_sku: dict[str, str],
     sku_to_zh: dict[str, str],
+    consolidation_plan: dict[str, object] | None = None,
 ) -> list[str]:
     errors: list[str] = []
     if not labels:
@@ -224,27 +227,68 @@ def validate(
     if missing_pdf_waybills:
         errors.append("YunExpress waybills without matching PDF: " + json.dumps(missing_pdf_waybills, ensure_ascii=False))
 
-    missing_dp_orders = []
-    missing_sku_names = []
-    for shipment in shipments.values():
-        sku = order_to_sku.get(shipment.order_id)
-        if not sku:
-            missing_dp_orders.append(shipment.order_id)
-            continue
-        if not sku_to_zh.get(sku):
-            missing_sku_names.append(sku)
-
-    if missing_dp_orders:
-        errors.append("YunExpress orders not found in DP order CSV: " + json.dumps(sorted(set(missing_dp_orders)), ensure_ascii=False))
     shipment_order_ids = {shipment.order_id for shipment in shipments.values()}
-    missing_yunexpress_orders = sorted(set(order_to_sku) - shipment_order_ids)
-    if missing_yunexpress_orders:
-        errors.append(
-            "DP orders without YunExpress shipment: "
-            + json.dumps(missing_yunexpress_orders, ensure_ascii=False)
-        )
-    if missing_sku_names:
-        errors.append("SKUs missing declaration Chinese name: " + json.dumps(sorted(set(missing_sku_names)), ensure_ascii=False))
+    if consolidation_plan is None:
+        missing_dp_orders = []
+        missing_sku_names = []
+        for shipment in shipments.values():
+            sku = order_to_sku.get(shipment.order_id)
+            if not sku:
+                missing_dp_orders.append(shipment.order_id)
+                continue
+            if not sku_to_zh.get(sku):
+                missing_sku_names.append(sku)
+
+        if missing_dp_orders:
+            errors.append("YunExpress orders not found in DP order CSV: " + json.dumps(sorted(set(missing_dp_orders)), ensure_ascii=False))
+        missing_yunexpress_orders = sorted(set(order_to_sku) - shipment_order_ids)
+        if missing_yunexpress_orders:
+            errors.append(
+                "DP orders without YunExpress shipment: "
+                + json.dumps(missing_yunexpress_orders, ensure_ascii=False)
+            )
+        if missing_sku_names:
+            errors.append("SKUs missing declaration Chinese name: " + json.dumps(sorted(set(missing_sku_names)), ensure_ascii=False))
+    else:
+        packages = order_consolidation.package_by_reference(consolidation_plan)
+        planned_orders = order_consolidation.order_to_package(consolidation_plan)
+        expected_references = set(packages)
+        if shipment_order_ids != expected_references:
+            errors.append(
+                "YunExpress customer references do not match consolidation plan: "
+                + json.dumps(
+                    {
+                        "missing": sorted(expected_references - shipment_order_ids),
+                        "extra": sorted(shipment_order_ids - expected_references),
+                    },
+                    ensure_ascii=False,
+                )
+            )
+        if set(order_to_sku) != set(planned_orders):
+            errors.append(
+                "DP order set does not match consolidation plan: "
+                + json.dumps(
+                    {
+                        "missing": sorted(set(order_to_sku) - set(planned_orders)),
+                        "extra": sorted(set(planned_orders) - set(order_to_sku)),
+                    },
+                    ensure_ascii=False,
+                )
+            )
+        inconsistent_skus = []
+        missing_sku_names = []
+        for order_id, package in planned_orders.items():
+            if order_to_sku.get(order_id) != package["sku"]:
+                inconsistent_skus.append(order_id)
+            if not sku_to_zh.get(str(package["sku"])):
+                missing_sku_names.append(str(package["sku"]))
+        if inconsistent_skus:
+            errors.append(
+                "DP order SKU does not match consolidation plan: "
+                + json.dumps(sorted(inconsistent_skus), ensure_ascii=False)
+            )
+        if missing_sku_names:
+            errors.append("SKUs missing declaration Chinese name: " + json.dumps(sorted(set(missing_sku_names)), ensure_ascii=False))
 
     return errors
 
@@ -263,13 +307,19 @@ def build_package(
     sku_xlsx: Path,
     ship_date: str,
     output_root: Path,
+    merge_map: Path | None = None,
 ) -> Path:
     order_to_sku = read_dp_orders(dp_orders_csv)
     shipments = read_yunexpress_shipments(yunexpress_xlsx)
     sku_to_zh = read_sku_chinese_names(sku_xlsx)
     labels = list(iter_label_pdfs(zip_path))
+    consolidation_plan = (
+        order_consolidation.load_plan(merge_map, dp_orders_csv, "yunexpress", ship_date)
+        if merge_map
+        else None
+    )
 
-    errors = validate(labels, shipments, order_to_sku, sku_to_zh)
+    errors = validate(labels, shipments, order_to_sku, sku_to_zh, consolidation_plan)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = output_root / f"面单按SKU_{ship_date}_{timestamp}"
     run_dir.mkdir(parents=True, exist_ok=False)
@@ -282,6 +332,7 @@ def build_package(
         "ship_date": ship_date,
         "pdf_count": len(labels),
         "yunexpress_shipment_count": len(shipments),
+        "merge_map": str(merge_map) if merge_map else None,
     }
 
     if errors:
@@ -289,10 +340,19 @@ def build_package(
         (run_dir / "校验失败报告.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
         raise ValueError(f"Validation failed. Report written to: {run_dir / '校验失败报告.json'}")
 
+    package_by_reference = (
+        order_consolidation.package_by_reference(consolidation_plan)
+        if consolidation_plan is not None
+        else {}
+    )
     sku_counts: Counter[str] = Counter()
     for label in labels:
         shipment = shipments[label.waybill]
-        sku_counts[order_to_sku[shipment.order_id]] += 1
+        package = package_by_reference.get(shipment.order_id)
+        if package and package["merged"]:
+            continue
+        sku = str(package["sku"]) if package else order_to_sku[shipment.order_id]
+        sku_counts[sku] += 1
 
     folder_name_by_sku = {
         sku: safe_name(f"{ship_date}_{sku}_{sku_to_zh[sku]}_{count}单")
@@ -301,12 +361,54 @@ def build_package(
 
     detail_rows_by_sku: dict[str, list[dict[str, object]]] = defaultdict(list)
     copied_rows: list[dict[str, object]] = []
+    merged_rows: list[dict[str, object]] = []
 
     with zipfile.ZipFile(zip_path) as zf:
         for label in labels:
             shipment = shipments[label.waybill]
-            sku = order_to_sku[shipment.order_id]
+            package = package_by_reference.get(shipment.order_id)
+            sku = str(package["sku"]) if package else order_to_sku[shipment.order_id]
             zh = sku_to_zh[sku]
+            if package and package["merged"]:
+                merge_root = run_dir / "合并件"
+                merge_root.mkdir(parents=True, exist_ok=True)
+                folder_name = safe_name(
+                    f"{ship_date}_合并件_{package['carrier_reference']}_{sku}_{zh}_"
+                    f"{package['order_count']}订单_{order_consolidation.filename_quantity(float(package['total_quantity']))}件_1面单"
+                )
+                folder = merge_root / folder_name
+                folder.mkdir(parents=True, exist_ok=False)
+                target_name = safe_name(f"{package['carrier_reference']}_{label.waybill}") + ".pdf"
+                target_path = folder / target_name
+                with zf.open(label.zip_name) as src, target_path.open("wb") as dst:
+                    shutil.copyfileobj(src, dst)
+                instruction_path = order_consolidation.write_supplier_instruction(
+                    package,
+                    shipment.waybill,
+                    folder / "合并订单说明.xlsx",
+                )
+                supplier_zip_path = folder / f"{folder_name}.zip"
+                with zipfile.ZipFile(supplier_zip_path, "w", compression=zipfile.ZIP_DEFLATED) as supplier_zip:
+                    supplier_zip.write(target_path, arcname=target_path.name)
+                    supplier_zip.write(instruction_path, arcname=instruction_path.name)
+                merged_row = {
+                    "日期": ship_date,
+                    "分组类型": "合并件",
+                    "SKU": sku,
+                    "申报中文名": zh,
+                    "客户单号": shipment.order_id,
+                    "DP订单号": ";".join(line["order_id"] for line in package["order_lines"]),
+                    "运单号": shipment.waybill,
+                    "跟踪号": shipment.tracking,
+                    "云途状态": shipment.status,
+                    "订单数量": package["order_count"],
+                    "商品总数量": package["total_quantity"],
+                    "PDF文件": target_name,
+                    "文件夹": str(Path("合并件") / folder_name),
+                }
+                merged_rows.append(merged_row)
+                copied_rows.append(merged_row)
+                continue
             folder = run_dir / folder_name_by_sku[sku]
             folder.mkdir(parents=True, exist_ok=True)
 
@@ -317,13 +419,18 @@ def build_package(
 
             row = {
                 "日期": ship_date,
+                "分组类型": "普通SKU",
                 "SKU": sku,
                 "申报中文名": zh,
                 "客户单号": shipment.order_id,
+                "DP订单号": shipment.order_id,
                 "运单号": shipment.waybill,
                 "跟踪号": shipment.tracking,
                 "云途状态": shipment.status,
+                "订单数量": 1,
+                "商品总数量": "",
                 "PDF文件": target_name,
+                "文件夹": folder_name_by_sku[sku],
             }
             detail_rows_by_sku[sku].append(row)
             copied_rows.append(row)
@@ -335,7 +442,21 @@ def build_package(
             for pdf_path in sorted(folder.glob("*.pdf")):
                 supplier_zip.write(pdf_path, arcname=pdf_path.name)
 
-    detail_fields = ["日期", "SKU", "申报中文名", "客户单号", "运单号", "跟踪号", "云途状态", "PDF文件"]
+    detail_fields = [
+        "日期",
+        "分组类型",
+        "SKU",
+        "申报中文名",
+        "客户单号",
+        "DP订单号",
+        "运单号",
+        "跟踪号",
+        "云途状态",
+        "订单数量",
+        "商品总数量",
+        "PDF文件",
+        "文件夹",
+    ]
     for sku, rows in detail_rows_by_sku.items():
         rows.sort(key=lambda row: str(row["客户单号"]))
 
@@ -351,12 +472,29 @@ def build_package(
         })
     write_csv(run_dir / "SKU分组汇总.csv", summary_rows, ["日期", "SKU", "申报中文名", "面单数量", "订单数量", "文件夹"])
     write_csv(run_dir / "全部面单明细.csv", sorted(copied_rows, key=lambda row: str(row["客户单号"])), detail_fields)
+    if merged_rows:
+        write_csv(
+            run_dir / "合并件汇总.csv",
+            sorted(merged_rows, key=lambda row: str(row["客户单号"])),
+            detail_fields,
+        )
+        order_consolidation.write_tracking_workbook(
+            consolidation_plan,
+            [
+                {"Order ID": shipment.order_id, "Tracking Number": shipment.waybill}
+                for shipment in shipments.values()
+            ],
+            run_dir / "合并订单与运单对应表.xlsx",
+            exact_output_path=True,
+        )
 
     report = {
         **report_base,
         "status": "OK",
         "output_dir": str(run_dir),
         "sku_count": len(summary_rows),
+        "merged_group_count": len(merged_rows),
+        "merged_label_count": len(merged_rows),
         "sku_summary": summary_rows,
     }
     (run_dir / "校验成功报告.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -369,6 +507,12 @@ def main() -> int:
     parser.add_argument("--yunexpress-xlsx", required=True, type=Path, help="YunExpress order info xlsx.")
     parser.add_argument("--dp-orders-csv", required=True, type=Path, help="DP exported orders CSV.")
     parser.add_argument("--sku-xlsx", required=True, type=Path, help="SKU declaration workbook.")
+    parser.add_argument(
+        "--merge-map",
+        type=Path,
+        default=None,
+        help="Consolidation JSON generated by step 1.",
+    )
     parser.add_argument("--date", required=True, help="Date prefix for folders, e.g. 2026-07-09.")
     parser.add_argument(
         "--output-root",
@@ -387,6 +531,7 @@ def main() -> int:
             sku_xlsx=args.sku_xlsx,
             ship_date=args.date,
             output_root=output_root,
+            merge_map=args.merge_map,
         )
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

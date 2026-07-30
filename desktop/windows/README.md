@@ -7,8 +7,11 @@ DropShipZone 澳大利亚订单到云途或顺丰国际发货的本地桌面工�
 1. 第 1 步可选择云途或顺丰国际，并生成相应批量寄件 Excel。
 2. 从云途或顺丰国际订单信息生成 DP 发货回填模板，并自动与第 1 步 DP 订单逐单核对。
 3. 云途面单按 SKU 分拣并生成供应商 ZIP；顺丰合并面单先与第 2 步运单逐单核对，再按寄方姓名拆成供应商 PDF。
+4. 第 1 步可勾选“合并相同收件人且相同 SKU 的订单”，生成前显示候选组数并要求确认。
 
 顺丰国际当前三步均已接入：批量上传、运单号回填 DP、合并面单按寄方姓名拆分。
+
+合单开启后，第 1 步同时生成“订单合并关系”Excel；第 2 步允许且仅允许同一合并组的多个 DP 订单共用一个运单号；第 3 步在结果根目录建立“合并件”，每组合并件包含一张面单、供应商说明和一个可直接发送的 ZIP。不同 SKU 不会自动合并。
 
 ## 当前状态
 
@@ -26,6 +29,7 @@ app.py
   generate_yunexpress_template.py
   generate_sf_international_template.py
   generate_dp_shipment_upload.py
+  order_consolidation.py
   sort_yunexpress_labels_by_sku.py
   split_sf_labels_by_sender.py
 ../../docs/

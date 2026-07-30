@@ -61,6 +61,40 @@ class SplitSfLabelsBySenderTests(unittest.TestCase):
             ["sf6047737000002", "SF6047737000001"],
         )
 
+    def test_partition_removes_merged_label_from_normal_sender_groups(self):
+        merged_package = {
+            "carrier_reference": "M260729001",
+            "merged": True,
+            "order_lines": [
+                {"order_id": "ORDER-001", "quantity": 1},
+                {"order_id": "ORDER-002", "quantity": 1},
+            ],
+        }
+        normal_package = {
+            "carrier_reference": "ORDER-003",
+            "merged": False,
+            "order_lines": [{"order_id": "ORDER-003", "quantity": 1}],
+        }
+        plan = {"packages": [merged_package, normal_package]}
+        shipment_rows = [
+            {"Order ID": "M260729001", "Tracking Number": "SF0000000000001"},
+            {"Order ID": "ORDER-003", "Tracking Number": "SF0000000000002"},
+        ]
+        labels = [
+            {"waybill": "SF0000000000001", "sender_name": "Supplier A", "page_index": 0},
+            {"waybill": "SF0000000000002", "sender_name": "Supplier A", "page_index": 1},
+        ]
+
+        normal, merged = splitter.partition_labels_by_consolidation(
+            labels,
+            shipment_rows,
+            plan,
+        )
+
+        self.assertEqual([label["waybill"] for label in normal], ["SF0000000000002"])
+        self.assertEqual([label["waybill"] for label, _ in merged], ["SF0000000000001"])
+        self.assertIs(merged[0][1], merged_package)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -35,6 +35,8 @@ docs/                   总体需求和开发进度文档
 | 2 | 云途订单信息 -> DP 回填模板 | 顺丰订单 `.xls/.xlsx` -> DP 回填模板，承运商为 `SF INTERNATIONAL` |
 | 3 | 面单 ZIP -> 按 SKU 的供应商文件夹与 ZIP | 合并面单 PDF 与第 2 步运单逐单核对后，按寄方姓名拆分 PDF |
 
+三个平台均支持“相同收件人 + 相同 SKU”合并发货。第 1 步按收件人姓名、街道、城市、州、邮编、电话六项标准化结果及 SKU 建立合单关系；第 2 步把同一承运商运单号展开回填到组内全部 DP 订单；第 3 步把该面单移入独立的“合并件”目录，并附供应商说明和单独 ZIP。不同 SKU、不同收件信息或一个 DP 订单含多个 SKU 时不会自动合并。
+
 ## 文档入口
 
 - Windows：[desktop/windows/README.md](desktop/windows/README.md)
@@ -43,3 +45,5 @@ docs/                   总体需求和开发进度文档
 - Web：[web/README.md](web/README.md)
 - Web 进度：[web/docs/WEB_DEVELOPMENT_PROGRESS.md](web/docs/WEB_DEVELOPMENT_PROGRESS.md)
 - 总体进度：[docs/DEVELOPMENT_PROGRESS.md](docs/DEVELOPMENT_PROGRESS.md)
+- 合单发布说明：[docs/SAME_RECIPIENT_CONSOLIDATION_RELEASE_2026-07-30.md](docs/SAME_RECIPIENT_CONSOLIDATION_RELEASE_2026-07-30.md)
+- Web 部署命令：[docs/WEB_DEPLOY_2026-07-30.md](docs/WEB_DEPLOY_2026-07-30.md)

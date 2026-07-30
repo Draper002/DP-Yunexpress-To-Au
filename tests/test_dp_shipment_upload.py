@@ -94,6 +94,45 @@ class DpShipmentUploadTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             shipment.validate_rows(rows, None, "SF International", "SF INTERNATIONAL")
 
+    def test_allows_duplicate_tracking_only_for_one_authorized_merged_package(self):
+        package = {
+            "carrier_reference": "M260729001",
+            "merged": True,
+            "order_lines": [
+                {"order_id": "ORDER-001", "quantity": 1},
+                {"order_id": "ORDER-002", "quantity": 2},
+            ],
+        }
+        plan = {"packages": [package]}
+        rows = [
+            {
+                "Order ID": order_id,
+                "Carrier": "SF INTERNATIONAL",
+                "Tracking Number": "SF0000000000001",
+                "Source Field": "SF waybill",
+                "Carrier Reference": "M260729001",
+            }
+            for order_id in ("ORDER-001", "ORDER-002")
+        ]
+
+        shipment.validate_rows(
+            rows,
+            {"ORDER-001", "ORDER-002"},
+            "SF International",
+            "SF INTERNATIONAL",
+            plan,
+        )
+
+        rows[1]["Carrier Reference"] = "M260729999"
+        with self.assertRaisesRegex(ValueError, "spans multiple carrier references"):
+            shipment.validate_rows(
+                rows,
+                {"ORDER-001", "ORDER-002"},
+                "SF International",
+                "SF INTERNATIONAL",
+                plan,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -16,6 +16,8 @@ from zipfile import ZIP_DEFLATED, ZipFile
 import openpyxl
 from openpyxl.utils import get_column_letter
 
+import order_consolidation
+
 from generate_yunexpress_template import (
     clean,
     default_output_root,
@@ -302,6 +304,7 @@ def write_template(
     ship_date: str,
     business_type: str,
     output_root: Path,
+    original_order_count: int | None = None,
 ) -> Path:
     workbook = openpyxl.load_workbook(template_path, data_only=False, read_only=True)
     try:
@@ -318,8 +321,10 @@ def write_template(
     output_dir = output_root / "顺丰国际上传模板"
     output_dir.mkdir(parents=True, exist_ok=True)
     safe_business_type = business_type.replace("/", "-").replace("\\", "-")
+    order_count = original_order_count if original_order_count is not None else len(rows)
     output_path = unique_path(
-        output_dir / f"顺丰国际批量寄件_{ship_date}_{len(rows)}orders_{safe_business_type}.xlsm"
+        output_dir
+        / f"顺丰国际批量寄件_{ship_date}_{len(rows)}packages_{order_count}orders_{safe_business_type}.xlsm"
     )
     write_rows_to_template_xml(template_path, output_path, sheet_name, rows, columns)
     return output_path
@@ -374,6 +379,12 @@ def main() -> int:
     parser.add_argument("--battery", choices=BATTERY_OPTIONS, default="否")
     parser.add_argument("--date", required=True)
     parser.add_argument("--status", default=DEFAULT_STATUS)
+    parser.add_argument(
+        "--merge-same-recipient-sku",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Merge orders only when all recipient fields and SKU match (default: enabled).",
+    )
     parser.add_argument("--output-root", type=Path, default=None)
     args = parser.parse_args()
 
@@ -381,13 +392,27 @@ def main() -> int:
         output_root = args.output_root or default_output_root(args.date)
         orders, source_counts = read_dp_orders(args.dp_orders_csv, args.status)
         sku_map = read_sku_info(args.sku_xlsx)
-        output_rows = build_sf_rows(orders, sku_map, args.business_type, args.battery)
+        consolidation_plan = order_consolidation.build_plan(
+            orders,
+            args.date,
+            "sf",
+            args.dp_orders_csv,
+            sku_map,
+            args.merge_same_recipient_sku,
+        )
+        carrier_orders = order_consolidation.consolidated_orders(orders, consolidation_plan)
+        output_rows = build_sf_rows(carrier_orders, sku_map, args.business_type, args.battery)
         output_path = write_template(
             args.sf_template_xlsm,
             output_rows,
             args.date,
             args.business_type,
             output_root,
+            len(orders),
+        )
+        merge_map_path, merge_workbook_path = order_consolidation.write_plan_files(
+            consolidation_plan,
+            output_path,
         )
         validation = validate_output(output_path)
         if validation["required_missing_count"] != 0 or validation["duplicate_order_ids"]:
@@ -396,6 +421,19 @@ def main() -> int:
             "status": "OK",
             "source_counts": source_counts,
             "output_path": str(output_path),
+            "merge_map_path": str(merge_map_path),
+            "merge_workbook_path": str(merge_workbook_path),
+            "consolidation": {
+                key: consolidation_plan[key]
+                for key in (
+                    "merge_enabled",
+                    "order_count",
+                    "package_count",
+                    "merged_group_count",
+                    "merged_order_count",
+                    "saved_parcel_count",
+                )
+            },
             "validation": validation,
         }
         output_path.with_suffix(".report.json").write_text(
@@ -406,6 +444,8 @@ def main() -> int:
         return 1
 
     print(f"OK: {output_path}")
+    print(f"MERGE_MAP: {merge_map_path}")
+    print(f"MERGE_REPORT: {merge_workbook_path}")
     return 0
 
 
